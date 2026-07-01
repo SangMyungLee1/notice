@@ -41,6 +41,8 @@
     </section>
   </main>
 
+  <div id="saveToast" class="toast" role="status" aria-live="polite">저장되었습니다.</div>
+
   <div id="imageModal" class="modal-backdrop" aria-hidden="true">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
       <div class="modal-head">
@@ -69,6 +71,8 @@
     const uploadStatus = document.getElementById('uploadStatus');
     const previewList = document.getElementById('previewList');
     const saveStatus = document.getElementById('saveStatus');
+    const saveToast = document.getElementById('saveToast');
+    const submitButton = document.querySelector('#postForm button[type="submit"]');
 
     async function verifySession() {
       try {
@@ -102,7 +106,16 @@
       document.execCommand('formatBlock', false, 'h2');
     });
 
+    function resetImageModal() {
+      uploadStatus.className = 'status';
+      uploadStatus.textContent = '';
+      previewList.innerHTML = '';
+      imageInput.value = '';
+      dropZone.classList.remove('dragover');
+    }
+
     openImageModal.addEventListener('click', () => {
+      resetImageModal();
       imageModal.classList.add('active');
       imageModal.setAttribute('aria-hidden', 'false');
     });
@@ -144,18 +157,33 @@
         return;
       }
 
+      uploadStatus.className = 'status';
+      uploadStatus.textContent = '이미지 업로드 중입니다.';
+      let successCount = 0;
+
       for (const file of images) {
-        await uploadOne(file);
+        const uploaded = await uploadOne(file);
+        if (uploaded) successCount += 1;
+      }
+
+      if (successCount === images.length) {
+        uploadStatus.className = 'status ok';
+        uploadStatus.textContent = '이미지가 본문에 삽입되었습니다.';
+        setTimeout(() => {
+          closeModal();
+          resetImageModal();
+        }, 500);
       }
     }
 
     async function uploadOne(file) {
+      const localPreviewUrl = URL.createObjectURL(file);
       const item = document.createElement('div');
       item.className = 'preview-item';
       const thumb = document.createElement('img');
-      thumb.src = URL.createObjectURL(file);
+      thumb.src = localPreviewUrl;
       const text = document.createElement('span');
-      text.textContent = `${file.name} 업로드 중...`;
+      text.textContent = '업로드 중...';
       item.append(thumb, text);
       previewList.prepend(item);
 
@@ -171,21 +199,32 @@
         const data = await res.json();
         if (!res.ok || !data.ok) throw new Error(data.message || '이미지 업로드에 실패했습니다.');
 
-        text.textContent = `${file.name} 업로드 완료`;
-        uploadStatus.className = 'status ok';
-        uploadStatus.textContent = '이미지가 업로드되어 본문에 삽입되었습니다.';
-        insertImage(data.url, data.alt || file.name);
+        text.textContent = '업로드 완료';
+        insertImage(data.url, data.alt || '', localPreviewUrl);
+        return true;
       } catch (error) {
-        text.textContent = `${file.name} 업로드 실패`;
+        text.textContent = '업로드 실패';
         uploadStatus.className = 'status err';
         uploadStatus.textContent = error.message;
+        URL.revokeObjectURL(localPreviewUrl);
+        return false;
       }
     }
 
-    function insertImage(url, alt) {
+    function insertImage(url, alt, previewUrl) {
       editor.focus();
-      const html = `<figure><img src="${escapeAttr(url)}" alt="${escapeAttr(alt)}"><figcaption>${escapeHtml(alt)}</figcaption></figure><p><br></p>`;
+      const html = `<figure class="image-figure"><img src="${escapeAttr(previewUrl || url)}" data-upload-src="${escapeAttr(url)}" alt="${escapeAttr(alt || '')}"></figure><p><br></p>`;
       document.execCommand('insertHTML', false, html);
+    }
+
+    function getContentHtmlForSave() {
+      const clone = editor.cloneNode(true);
+      clone.querySelectorAll('img[data-upload-src]').forEach((img) => {
+        img.setAttribute('src', img.getAttribute('data-upload-src'));
+        img.removeAttribute('data-upload-src');
+      });
+      clone.querySelectorAll('figcaption').forEach((node) => node.remove());
+      return clone.innerHTML.trim();
     }
 
     function escapeHtml(value) {
@@ -196,11 +235,12 @@
     document.getElementById('postForm').addEventListener('submit', async (event) => {
       event.preventDefault();
       const title = document.getElementById('title').value.trim();
-      const contentHtml = editor.innerHTML.trim();
+      const contentHtml = getContentHtmlForSave();
       if (!title) return setSaveStatus('제목을 입력하세요.', 'err');
       if (!contentHtml || contentHtml === '<br>') return setSaveStatus('내용을 입력하세요.', 'err');
 
-      setSaveStatus('게시글을 저장하고 HTML 파일을 생성하는 중입니다.', '');
+      setSaveStatus('게시글을 저장하는 중입니다.', '');
+      submitButton.disabled = true;
       try {
         const res = await fetch('/api/create-post', {
           method: 'POST',
@@ -212,18 +252,44 @@
         });
         const data = await res.json();
         if (!res.ok || !data.ok) throw new Error(data.message || '저장에 실패했습니다.');
-        setSaveStatus(`저장되었습니다. Cloudflare 재배포 후 새 글이 반영됩니다. 주소: ${data.url}`, 'ok');
-        const link = document.createElement('a');
-        link.href = data.url;
-        link.textContent = '새 글 열기';
-        link.target = '_blank';
-        link.className = 'btn btn-light';
-        saveStatus.appendChild(document.createElement('br'));
-        saveStatus.appendChild(link);
+        const plainText = editor.innerText.trim();
+        rememberPendingPost({
+          id: data.id,
+          title,
+          slug: data.slug || (data.path ? data.path.split('/').pop() : ''),
+          path: data.path,
+          createdAt: data.createdAt || new Date().toISOString(),
+          excerpt: data.excerpt || plainText.slice(0, 135),
+          searchText: data.searchText || plainText,
+          savedAtMs: Date.now()
+        });
+        setSaveStatus('', '');
+        showToast('저장되었습니다.');
+        setTimeout(() => {
+          location.href = '/ab-qna/?fresh=' + encodeURIComponent(data.id || Date.now());
+        }, 2000);
       } catch (error) {
+        submitButton.disabled = false;
         setSaveStatus(error.message, 'err');
       }
     });
+
+    function showToast(message) {
+      saveToast.textContent = message;
+      saveToast.classList.add('active');
+      setTimeout(() => saveToast.classList.remove('active'), 1800);
+    }
+
+    function rememberPendingPost(post) {
+      if (!post || !post.path) return;
+      try {
+        const key = 'notice_pending_posts';
+        const current = JSON.parse(localStorage.getItem(key) || '[]');
+        const rows = Array.isArray(current) ? current : [];
+        const next = [post].concat(rows.filter((item) => String(item.id || item.path) !== String(post.id || post.path)));
+        localStorage.setItem(key, JSON.stringify(next.slice(0, 20)));
+      } catch (_) {}
+    }
 
     function setSaveStatus(message, type) {
       saveStatus.className = `status ${type || ''}`;

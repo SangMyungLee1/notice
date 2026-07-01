@@ -86,7 +86,7 @@ async function handleCreatePost(request, env) {
   const slug = `ab-qna_v-${nextId}.html`;
   const path = `ab-qna/${slug}`;
   const excerpt = createExcerpt(contentHtml, 135);
-  const newPost = { id: nextId, title, slug, path, createdAt, excerpt };
+  const newPost = { id: nextId, title, slug, path, createdAt, excerpt, searchText: stripTags(contentHtml) };
   const nextPosts = [newPost, ...posts].sort((a, b) => Number(b.id) - Number(a.id));
 
   const files = [
@@ -100,7 +100,17 @@ async function handleCreatePost(request, env) {
 
   await commitFiles(env, `create post ${nextId}: ${title}`, files);
 
-  return json({ ok: true, id: nextId, path, url: `${trimSlash(env.SITE_URL)}/${path}` });
+  return json({
+    ok: true,
+    id: nextId,
+    title,
+    slug,
+    path,
+    createdAt,
+    excerpt,
+    searchText: newPost.searchText,
+    url: `${trimSlash(env.SITE_URL)}/${path}`
+  });
 }
 
 async function safeJson(request) {
@@ -378,6 +388,159 @@ function renderRows(posts) {
       </div>`).join('\n');
 }
 
+function safeScriptJson(value) {
+  return JSON.stringify(value)
+    .replace(/</g, '\\u003c')
+    .replace(/>/g, '\\u003e')
+    .replace(/&/g, '\\u0026')
+    .replace(/\u2028/g, '\\u2028')
+    .replace(/\u2029/g, '\\u2029');
+}
+
+function renderBoardScript(posts) {
+  return `<script>
+(function(){
+  var posts = ${safeScriptJson(posts)};
+
+  function mergePendingPosts(basePosts) {
+    var base = Array.isArray(basePosts) ? basePosts.slice() : [];
+    var originalKeys = {};
+    base.forEach(function(post) {
+      originalKeys[String(post.id || post.path)] = true;
+    });
+    var pending = [];
+    try {
+      pending = JSON.parse(localStorage.getItem('notice_pending_posts') || '[]');
+      if (!Array.isArray(pending)) pending = [];
+    } catch (_) { pending = []; }
+    var now = Date.now();
+    var stillPending = [];
+    pending.forEach(function(post) {
+      if (!post || !post.path) return;
+      var key = String(post.id || post.path);
+      var savedAt = Number(post.savedAtMs || 0);
+      var expired = savedAt && (now - savedAt > 24 * 60 * 60 * 1000);
+      if (expired) return;
+      if (originalKeys[key]) return;
+      originalKeys[key] = true;
+      stillPending.push(post);
+      base.unshift(post);
+    });
+    try {
+      if (stillPending.length) localStorage.setItem('notice_pending_posts', JSON.stringify(stillPending.slice(0, 20)));
+      else localStorage.removeItem('notice_pending_posts');
+    } catch (_) {}
+    return base.sort(function(a, b) {
+      var aid = Number(a.id) || 0;
+      var bid = Number(b.id) || 0;
+      if (aid !== bid) return bid - aid;
+      return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+    });
+  }
+  posts = mergePendingPosts(posts);
+  var perPage = 10;
+  var currentPage = 1;
+  var currentQuery = '';
+  var list = document.getElementById('boardList');
+  var pagination = document.getElementById('boardPagination');
+  var empty = document.getElementById('boardEmpty');
+  var form = document.getElementById('boardSearchForm');
+  var input = document.getElementById('boardSearchInput');
+
+  function escapeHtml(value) {
+    return String(value == null ? '' : value).replace(/[&<>\"']/g, function(ch) {
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch] || ch;
+    });
+  }
+  function displayDate(value) {
+    var d = new Date(value);
+    if (isNaN(d.getTime())) return String(value || '').slice(0, 10);
+    var y = d.getFullYear();
+    var m = String(d.getMonth() + 1).padStart(2, '0');
+    var day = String(d.getDate()).padStart(2, '0');
+    return y + '.' + m + '.' + day;
+  }
+  function normalize(value) {
+    return String(value || '').toLowerCase().replace(/\\s+/g, ' ').trim();
+  }
+  function filteredPosts() {
+    var q = normalize(currentQuery);
+    if (!q) return posts.slice();
+    return posts.filter(function(post) {
+      var target = normalize([post.id, post.title, post.excerpt, post.searchText].join(' '));
+      return target.indexOf(q) !== -1;
+    });
+  }
+  function renderRows(rows) {
+    if (!rows.length) {
+      list.innerHTML = '';
+      empty.classList.add('active');
+      return;
+    }
+    empty.classList.remove('active');
+    list.innerHTML = rows.map(function(post) {
+      return '<div class="board-row">' +
+        '<div class="board-no">' + escapeHtml(post.id) + '</div>' +
+        '<a class="board-title" href="/' + escapeHtml(post.path) + '">' + escapeHtml(post.title) + '</a>' +
+        '<div class="board-date">' + displayDate(post.createdAt) + '</div>' +
+      '</div>';
+    }).join('');
+  }
+  function pageButton(label, page, active, disabled) {
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'page-btn' + (active ? ' active' : '');
+    btn.textContent = label;
+    btn.disabled = !!disabled;
+    if (!disabled) btn.addEventListener('click', function(){ currentPage = page; render(true); });
+    return btn;
+  }
+  function renderPagination(totalPages) {
+    pagination.innerHTML = '';
+    if (totalPages <= 1) return;
+    var blockStart = Math.floor((currentPage - 1) / 10) * 10 + 1;
+    var blockEnd = Math.min(blockStart + 9, totalPages);
+    pagination.appendChild(pageButton('‹', Math.max(1, blockStart - 10), false, blockStart === 1));
+    for (var i = blockStart; i <= blockEnd; i++) {
+      pagination.appendChild(pageButton(String(i), i, i === currentPage, false));
+    }
+    pagination.appendChild(pageButton('›', Math.min(totalPages, blockStart + 10), false, blockEnd >= totalPages));
+  }
+  function updateUrl() {
+    var params = new URLSearchParams();
+    if (currentQuery) params.set('q', currentQuery);
+    if (currentPage > 1) params.set('page', String(currentPage));
+    var qs = params.toString();
+    history.replaceState({ q: currentQuery, page: currentPage }, '', qs ? '/ab-qna/?' + qs : '/ab-qna/');
+  }
+  function render(syncUrl) {
+    var filtered = filteredPosts();
+    var totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
+    currentPage = Math.max(1, Math.min(currentPage, totalPages));
+    var start = (currentPage - 1) * perPage;
+    renderRows(filtered.slice(start, start + perPage));
+    renderPagination(totalPages);
+    if (syncUrl) updateUrl();
+  }
+  function loadFromUrl() {
+    var params = new URLSearchParams(location.search);
+    currentQuery = params.get('q') || '';
+    currentPage = Math.max(1, parseInt(params.get('page') || '1', 10) || 1);
+    input.value = currentQuery;
+    render(false);
+  }
+  form.addEventListener('submit', function(event) {
+    event.preventDefault();
+    currentQuery = input.value.trim();
+    currentPage = 1;
+    render(true);
+  });
+  window.addEventListener('popstate', loadFromUrl);
+  loadFromUrl();
+})();
+<\/script>`;
+}
+
 function renderListPage(env, posts) {
   const body = `    <section class="card post-wrap">
       <div class="board-toolbar">
@@ -387,9 +550,16 @@ function renderListPage(env, posts) {
         </div>
         <a class="btn btn-primary" href="/admin/password.html">글쓰기</a>
       </div>
-      <div class="board-list">
-${renderRows(posts)}
+      <form id="boardSearchForm" class="board-search" role="search">
+        <input id="boardSearchInput" type="search" placeholder="검색어를 입력해주세요" autocomplete="off">
+        <button class="search-btn" type="submit" aria-label="검색">검색</button>
+      </form>
+      <div id="boardList" class="board-list">
+${renderRows(posts.slice(0, 10))}
       </div>
+      <div id="boardEmpty" class="board-empty">검색 결과가 없습니다.</div>
+      <div id="boardPagination" class="pagination" aria-label="페이지 이동"></div>
+${renderBoardScript(posts)}
     </section>`;
   return layout(env, '올딜 생활게시판 목록', '올딜 생활게시판의 최신 게시글 목록입니다.', body, '/ab-qna/');
 }

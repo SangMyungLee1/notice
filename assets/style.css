@@ -176,7 +176,7 @@ a:hover { color: var(--point); }
   border: 1px solid var(--line);
 }
 .post-content figure { margin: 24px 0; }
-.post-content figcaption { color: var(--muted); font-size: 14px; text-align: center; }
+.post-content figcaption { display: none; }
 
 .notice-box {
   background: var(--soft);
@@ -337,4 +337,112 @@ a:hover { color: var(--point); }
   .board-date { text-align: left; }
   .board-toolbar { align-items: flex-start; flex-direction: column; }
   .post-wrap { padding: 22px; }
+}
+
+
+.board-search {
+  display: flex;
+  width: min(360px, 100%);
+  margin: 0 0 20px;
+}
+
+.board-search input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-right: 0;
+  border-radius: 12px 0 0 12px;
+  padding: 12px 14px;
+  font: inherit;
+  outline: none;
+  background: #fff;
+}
+
+.board-search input:focus {
+  border-color: var(--point);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, .10);
+}
+
+.search-btn {
+  border: 0;
+  border-radius: 0 12px 12px 0;
+  background: var(--point);
+  color: #fff;
+  min-width: 58px;
+  padding: 0 18px;
+  font-weight: 900;
+  cursor: pointer;
+}
+.search-btn:hover { background: var(--point-dark); }
+
+.board-empty {
+  display: none;
+  padding: 28px 18px;
+  text-align: center;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #fff;
+}
+.board-empty.active { display: block; }
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin: 28px 0 0;
+  flex-wrap: wrap;
+}
+
+.page-btn {
+  min-width: 34px;
+  height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: #fff;
+  color: var(--text);
+  font-weight: 700;
+  cursor: pointer;
+}
+.page-btn:hover { border-color: var(--point); color: var(--point); }
+.page-btn.active {
+  background: #111827;
+  color: #fff;
+  border-color: #111827;
+}
+.page-btn:disabled {
+  opacity: .35;
+  cursor: not-allowed;
+}
+
+.image-figure { margin: 18px 0; }
+.editor figure { margin: 18px 0; }
+.editor figcaption { display: none; }
+
+.toast {
+  position: fixed;
+  left: 50%;
+  top: 38px;
+  transform: translate(-50%, -20px);
+  background: #111827;
+  color: #fff;
+  border-radius: 999px;
+  padding: 13px 22px;
+  font-weight: 800;
+  box-shadow: 0 18px 50px rgba(15, 23, 42, .28);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .18s ease, transform .18s ease;
+  z-index: 100;
+}
+.toast.active {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+button:disabled,
+.btn:disabled {
+  opacity: .65;
+  cursor: not-allowed;
 }
