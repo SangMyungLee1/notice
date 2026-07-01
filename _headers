@@ -4,3 +4,12 @@
 
 /api/*
   Cache-Control: no-store
+
+/ab-qna/
+  Cache-Control: max-age=0, must-revalidate
+
+/ab-qna/*
+  Cache-Control: max-age=0, must-revalidate
+
+/assets/*
+  Cache-Control: max-age=0, must-revalidate
