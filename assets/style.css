@@ -203,7 +203,7 @@ a:hover { color: var(--point); }
   padding: 28px;
 }
 
-.admin-card.wide { width: min(960px, 100%); }
+.admin-card.wide { width: min(900px, 100%); }
 .admin-card h1 { margin: 0 0 10px; letter-spacing: -0.05em; }
 .admin-card p { color: var(--muted); margin: 0 0 22px; }
 
@@ -235,8 +235,12 @@ a:hover { color: var(--point); }
 }
 
 .editor {
-  min-height: 420px;
-  overflow: auto;
+  min-height: 350px;
+  height: 350px;
+  max-height: 350px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-gutter: stable;
 }
 
 .editor:empty:before {
@@ -250,6 +254,13 @@ a:hover { color: var(--point); }
   margin: 16px auto;
   border-radius: 14px;
 }
+
+.editor a { color: var(--point); text-decoration: underline; }
+.editor img.selected-editor-image {
+  outline: 4px solid rgba(37, 99, 235, .45);
+  outline-offset: 4px;
+}
+
 
 .editor-toolbar {
   display: flex;
