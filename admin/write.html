@@ -78,6 +78,15 @@
     let selectedImage = null;
     let savedRange = null;
 
+    function lockEditorScrollBox() {
+      editor.style.height = '330px';
+      editor.style.minHeight = '330px';
+      editor.style.maxHeight = '330px';
+      editor.style.overflowY = 'scroll';
+      editor.style.overflowX = 'auto';
+    }
+    lockEditorScrollBox();
+
     async function verifySession() {
       try {
         const res = await fetch('/api/verify', {
@@ -308,6 +317,7 @@
       editor.focus();
       const html = `<figure class="image-figure"><img src="${escapeAttr(previewUrl || url)}" data-upload-src="${escapeAttr(url)}" alt="${escapeAttr(alt || '')}"></figure><p><br></p>`;
       document.execCommand('insertHTML', false, html);
+      requestAnimationFrame(() => { editor.scrollTop = editor.scrollHeight; });
     }
 
     function getContentHtmlForSave() {
@@ -339,7 +349,7 @@
       if (!title) return setSaveStatus('제목을 입력하세요.', 'err');
       if (!contentHtml || contentHtml === '<br>') return setSaveStatus('내용을 입력하세요.', 'err');
 
-      setSaveStatus('게시글을 저장하는 중입니다.', '');
+      setSaveStatus('', '');
       saveButtons.forEach((button) => button.disabled = true);
       try {
         const res = await fetch('/api/create-post', {

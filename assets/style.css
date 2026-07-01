@@ -203,7 +203,7 @@ a:hover { color: var(--point); }
   padding: 28px;
 }
 
-.admin-card.wide { width: min(900px, 100%); }
+.admin-card.wide { width: min(860px, 100%); }
 .admin-card h1 { margin: 0 0 10px; letter-spacing: -0.05em; }
 .admin-card p { color: var(--muted); margin: 0 0 22px; }
 
@@ -235,12 +235,17 @@ a:hover { color: var(--point); }
 }
 
 .editor {
-  min-height: 350px;
-  height: 350px;
-  max-height: 350px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  scrollbar-gutter: stable;
+  display: block;
+  width: 100%;
+  min-height: 330px !important;
+  height: 330px !important;
+  max-height: 330px !important;
+  overflow-y: scroll !important;
+  overflow-x: auto;
+  scrollbar-gutter: stable both-edges;
+  overscroll-behavior: contain;
+  word-break: break-word;
+  white-space: normal;
 }
 
 .editor:empty:before {
@@ -249,7 +254,8 @@ a:hover { color: var(--point); }
 }
 
 .editor img {
-  max-width: 100%;
+  max-width: calc(100% - 18px);
+  height: auto;
   display: block;
   margin: 16px auto;
   border-radius: 14px;
@@ -457,3 +463,15 @@ button:disabled,
   opacity: .65;
   cursor: not-allowed;
 }
+
+
+/* Editor scroll safety: keep long text/images inside the editor box. */
+.admin-card.wide #editor.editor {
+  height: 330px !important;
+  min-height: 330px !important;
+  max-height: 330px !important;
+  overflow-y: scroll !important;
+  overflow-x: auto;
+}
+.admin-card.wide #editor.editor > *:first-child { margin-top: 0; }
+.admin-card.wide #editor.editor > *:last-child { margin-bottom: 0; }

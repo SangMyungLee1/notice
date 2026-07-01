@@ -347,8 +347,28 @@ function displayDate(value) {
   } catch (_) { return String(value).slice(0, 10); }
 }
 
-function layout(env, title, description, body, canonicalPath = '/') {
+function absoluteUrl(env, value) {
   const site = trimSlash(env.SITE_URL);
+  const v = String(value || '').trim();
+  if (!v) return '';
+  if (/^https?:\/\//i.test(v)) return v;
+  return site + (v.startsWith('/') ? v : '/' + v);
+}
+
+function extractFirstImageUrl(env, html) {
+  const match = String(html || '').match(/<img[^>]+src=["']([^"']+)["']/i);
+  return match ? absoluteUrl(env, match[1]) : '';
+}
+
+function layout(env, title, description, body, canonicalPath = '/', options = {}) {
+  const site = trimSlash(env.SITE_URL);
+  const canonicalUrl = site + canonicalPath;
+  const ogType = options.ogType || 'website';
+  const ogImage = options.ogImage ? `
+  <meta property="og:image" content="${escapeHtml(options.ogImage)}">
+  <meta name="twitter:image" content="${escapeHtml(options.ogImage)}">` : '';
+  const articleMeta = options.publishedTime ? `
+  <meta property="article:published_time" content="${escapeHtml(options.publishedTime)}">` : '';
   return `<!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -356,7 +376,16 @@ function layout(env, title, description, body, canonicalPath = '/') {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${escapeHtml(title)}</title>
   <meta name="description" content="${escapeHtml(description)}">
-  <link rel="canonical" href="${site}${canonicalPath}">
+  <meta property="og:locale" content="ko_KR">
+  <meta property="og:site_name" content="올딜 생활게시판">
+  <meta property="og:title" content="${escapeHtml(title)}">
+  <meta property="og:description" content="${escapeHtml(description)}">
+  <meta property="og:url" content="${escapeHtml(canonicalUrl)}">
+  <meta property="og:type" content="${escapeHtml(ogType)}">${ogImage}${articleMeta}
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="${escapeHtml(title)}">
+  <meta name="twitter:description" content="${escapeHtml(description)}">
+  <link rel="canonical" href="${escapeHtml(canonicalUrl)}">
   <link rel="stylesheet" href="/assets/style.css">
 </head>
 <body>
@@ -589,7 +618,7 @@ ${contentHtml}
       </div>
       <p style="margin-top:28px"><a class="btn btn-light" href="/ab-qna/">목록으로</a></p>
     </article>`;
-  return layout(env, post.title, post.excerpt, body, `/${post.path}`);
+  return layout(env, post.title, post.excerpt, body, `/${post.path}`, { ogType: 'article', ogImage: extractFirstImageUrl(env, contentHtml), publishedTime: post.createdAt });
 }
 
 function renderSitemap(env, posts) {
