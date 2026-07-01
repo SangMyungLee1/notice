@@ -7,10 +7,10 @@ export async function onRequest(context) {
   const route = url.pathname.replace(/^\/api\/?/, '').replace(/\/$/, '');
 
   try {
-    if (route === 'login' && request.method === 'POST') return handleLogin(request, env);
-    if (route === 'verify' && request.method === 'GET') return handleVerify(request, env);
-    if (route === 'upload-image' && request.method === 'POST') return handleUploadImage(request, env);
-    if (route === 'create-post' && request.method === 'POST') return handleCreatePost(request, env);
+    if (route === 'login' && request.method === 'POST') return await handleLogin(request, env);
+    if (route === 'verify' && request.method === 'GET') return await handleVerify(request, env);
+    if (route === 'upload-image' && request.method === 'POST') return await handleUploadImage(request, env);
+    if (route === 'create-post' && request.method === 'POST') return await handleCreatePost(request, env);
     return json({ ok: false, message: '지원하지 않는 API 경로입니다.' }, 404);
   } catch (error) {
     return json({ ok: false, message: error.message || '서버 처리 중 오류가 발생했습니다.' }, 500);
@@ -37,6 +37,11 @@ async function handleVerify(request, env) {
 async function handleUploadImage(request, env) {
   requireEnv(env, ['ADMIN_TOKEN_SECRET', 'GITHUB_TOKEN', 'GITHUB_OWNER', 'GITHUB_REPO', 'GITHUB_BRANCH', 'SITE_URL']);
   await requireAuth(request, env);
+
+  const contentType = request.headers.get('content-type') || '';
+  if (!contentType.toLowerCase().includes('multipart/form-data')) {
+    return json({ ok: false, message: '이미지 파일이 없습니다.' }, 400);
+  }
 
   const form = await request.formData();
   const file = form.get('image');
