@@ -237,9 +237,9 @@ a:hover { color: var(--point); }
 .editor {
   display: block;
   width: 100%;
-  min-height: 330px !important;
-  height: 330px !important;
-  max-height: 330px !important;
+  min-height: 600px !important;
+  height: 600px !important;
+  max-height: 600px !important;
   overflow-y: scroll !important;
   overflow-x: auto;
   scrollbar-gutter: stable both-edges;
@@ -467,9 +467,9 @@ button:disabled,
 
 /* Editor scroll safety: keep long text/images inside the editor box. */
 .admin-card.wide #editor.editor {
-  height: 330px !important;
-  min-height: 330px !important;
-  max-height: 330px !important;
+  height: 600px !important;
+  min-height: 600px !important;
+  max-height: 600px !important;
   overflow-y: scroll !important;
   overflow-x: auto;
 }
