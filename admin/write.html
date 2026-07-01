@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>게시글 작성</title>
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <main class="admin-wrap">
+    <section class="admin-card wide">
+      <h1>게시글 작성</h1>
+      <p>이미지는 제목 입력칸보다 위에 있는 버튼으로 먼저 업로드할 수 있습니다. 이미지 업로드 창 안에 파일을 끌어다 놓으면 자동으로 업로드되고 본문에 삽입됩니다.</p>
+
+      <div class="form-row">
+        <button id="openImageModal" class="btn btn-primary" type="button">이미지 추가</button>
+        <button id="logoutBtn" class="btn btn-light" type="button">나가기</button>
+      </div>
+
+      <form id="postForm">
+        <div class="form-row">
+          <label class="label" for="title">제목</label>
+          <input class="input" id="title" type="text" maxlength="90" placeholder="게시글 제목을 입력하세요" required>
+        </div>
+
+        <div class="form-row">
+          <label class="label" for="editor">내용</label>
+          <div class="editor-toolbar">
+            <button class="btn btn-light" type="button" data-command="bold">굵게</button>
+            <button class="btn btn-light" type="button" data-command="insertUnorderedList">목록</button>
+            <button class="btn btn-light" type="button" id="addSubTitle">소제목</button>
+          </div>
+          <div id="editor" class="editor" contenteditable="true" data-placeholder="여기에 내용을 입력하세요. 이미지 추가 버튼으로 올린 이미지는 본문에 자동 삽입됩니다."></div>
+        </div>
+
+        <button class="btn btn-primary" type="submit">저장하기</button>
+        <a class="btn btn-light" href="/ab-qna/">목록 보기</a>
+        <div id="saveStatus" class="status" role="status"></div>
+      </form>
+    </section>
+  </main>
+
+  <div id="imageModal" class="modal-backdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-head">
+        <h2 id="modalTitle">이미지 업로드</h2>
+        <button id="closeImageModal" class="btn btn-light" type="button">닫기</button>
+      </div>
+      <label id="dropZone" class="drop-zone" for="imageInput">
+        <strong>이곳에 이미지를 끌어다 놓으세요</strong>
+        <span>또는 클릭해서 이미지 파일을 선택하세요.</span>
+        <input id="imageInput" type="file" accept="image/*" multiple>
+      </label>
+      <div id="uploadStatus" class="status"></div>
+      <div id="previewList" class="preview-list"></div>
+    </div>
+  </div>
+
+  <script>
+    const tokenKey = 'notice_admin_token';
+    const token = () => localStorage.getItem(tokenKey) || '';
+    const editor = document.getElementById('editor');
+    const imageModal = document.getElementById('imageModal');
+    const openImageModal = document.getElementById('openImageModal');
+    const closeImageModal = document.getElementById('closeImageModal');
+    const dropZone = document.getElementById('dropZone');
+    const imageInput = document.getElementById('imageInput');
+    const uploadStatus = document.getElementById('uploadStatus');
+    const previewList = document.getElementById('previewList');
+    const saveStatus = document.getElementById('saveStatus');
+
+    async function verifySession() {
+      try {
+        const res = await fetch('/api/verify', {
+          headers: { Authorization: `Bearer ${token()}` }
+        });
+        const data = await res.json();
+        if (!res.ok || !data.ok) throw new Error('인증 필요');
+      } catch (_) {
+        localStorage.removeItem(tokenKey);
+        location.replace('/admin/password.html');
+      }
+    }
+
+    verifySession();
+
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      localStorage.removeItem(tokenKey);
+      location.href = '/ab-qna/';
+    });
+
+    document.querySelectorAll('[data-command]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        editor.focus();
+        document.execCommand(btn.dataset.command, false, null);
+      });
+    });
+
+    document.getElementById('addSubTitle').addEventListener('click', () => {
+      editor.focus();
+      document.execCommand('formatBlock', false, 'h2');
+    });
+
+    openImageModal.addEventListener('click', () => {
+      imageModal.classList.add('active');
+      imageModal.setAttribute('aria-hidden', 'false');
+    });
+
+    function closeModal() {
+      imageModal.classList.remove('active');
+      imageModal.setAttribute('aria-hidden', 'true');
+    }
+    closeImageModal.addEventListener('click', closeModal);
+    imageModal.addEventListener('click', (event) => {
+      if (event.target === imageModal) closeModal();
+    });
+
+    ['dragenter', 'dragover'].forEach((name) => {
+      dropZone.addEventListener(name, (event) => {
+        event.preventDefault();
+        dropZone.classList.add('dragover');
+      });
+    });
+    ['dragleave', 'drop'].forEach((name) => {
+      dropZone.addEventListener(name, (event) => {
+        event.preventDefault();
+        dropZone.classList.remove('dragover');
+      });
+    });
+    dropZone.addEventListener('drop', (event) => {
+      uploadFiles(Array.from(event.dataTransfer.files || []));
+    });
+    imageInput.addEventListener('change', () => {
+      uploadFiles(Array.from(imageInput.files || []));
+      imageInput.value = '';
+    });
+
+    async function uploadFiles(files) {
+      const images = files.filter(file => file.type.startsWith('image/'));
+      if (!images.length) {
+        uploadStatus.className = 'status err';
+        uploadStatus.textContent = '이미지 파일만 업로드할 수 있습니다.';
+        return;
+      }
+
+      for (const file of images) {
+        await uploadOne(file);
+      }
+    }
+
+    async function uploadOne(file) {
+      const item = document.createElement('div');
+      item.className = 'preview-item';
+      const thumb = document.createElement('img');
+      thumb.src = URL.createObjectURL(file);
+      const text = document.createElement('span');
+      text.textContent = `${file.name} 업로드 중...`;
+      item.append(thumb, text);
+      previewList.prepend(item);
+
+      try {
+        if (file.size > 5 * 1024 * 1024) throw new Error('이미지는 5MB 이하로 올려주세요.');
+        const formData = new FormData();
+        formData.append('image', file);
+        const res = await fetch('/api/upload-image', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token()}` },
+          body: formData
+        });
+        const data = await res.json();
+        if (!res.ok || !data.ok) throw new Error(data.message || '이미지 업로드에 실패했습니다.');
+
+        text.textContent = `${file.name} 업로드 완료`;
+        uploadStatus.className = 'status ok';
+        uploadStatus.textContent = '이미지가 업로드되어 본문에 삽입되었습니다.';
+        insertImage(data.url, data.alt || file.name);
+      } catch (error) {
+        text.textContent = `${file.name} 업로드 실패`;
+        uploadStatus.className = 'status err';
+        uploadStatus.textContent = error.message;
+      }
+    }
+
+    function insertImage(url, alt) {
+      editor.focus();
+      const html = `<figure><img src="${escapeAttr(url)}" alt="${escapeAttr(alt)}"><figcaption>${escapeHtml(alt)}</figcaption></figure><p><br></p>`;
+      document.execCommand('insertHTML', false, html);
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[char]));
+    }
+    function escapeAttr(value) { return escapeHtml(value).replace(/'/g, '&#39;'); }
+
+    document.getElementById('postForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const title = document.getElementById('title').value.trim();
+      const contentHtml = editor.innerHTML.trim();
+      if (!title) return setSaveStatus('제목을 입력하세요.', 'err');
+      if (!contentHtml || contentHtml === '<br>') return setSaveStatus('내용을 입력하세요.', 'err');
+
+      setSaveStatus('게시글을 저장하고 HTML 파일을 생성하는 중입니다.', '');
+      try {
+        const res = await fetch('/api/create-post', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token()}`
+          },
+          body: JSON.stringify({ title, contentHtml })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.ok) throw new Error(data.message || '저장에 실패했습니다.');
+        setSaveStatus(`저장되었습니다. Cloudflare 재배포 후 새 글이 반영됩니다. 주소: ${data.url}`, 'ok');
+        const link = document.createElement('a');
+        link.href = data.url;
+        link.textContent = '새 글 열기';
+        link.target = '_blank';
+        link.className = 'btn btn-light';
+        saveStatus.appendChild(document.createElement('br'));
+        saveStatus.appendChild(link);
+      } catch (error) {
+        setSaveStatus(error.message, 'err');
+      }
+    });
+
+    function setSaveStatus(message, type) {
+      saveStatus.className = `status ${type || ''}`;
+      saveStatus.textContent = message;
+    }
+  </script>
+</body>
+</html>
