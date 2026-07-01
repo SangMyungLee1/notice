@@ -1,4 +1,2 @@
 User-agent: *
 Allow: /
-Disallow: /admin/write.html
-Sitemap: https://notice.life-helper.co.kr/sitemap.xml
