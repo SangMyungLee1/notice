@@ -475,3 +475,40 @@ button:disabled,
 }
 .admin-card.wide #editor.editor > *:first-child { margin-top: 0; }
 .admin-card.wide #editor.editor > *:last-child { margin-bottom: 0; }
+
+
+.post-nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 32px 0 0;
+}
+.post-nav-link {
+  display: block;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #fff;
+  padding: 16px 18px;
+  text-decoration: none;
+  color: var(--text);
+}
+.post-nav-link span {
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+.post-nav-link strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.post-nav-link:hover { border-color: var(--point); color: var(--point); }
+.post-nav-link.next { text-align: right; }
+.post-nav-link.disabled { opacity: .45; pointer-events: none; }
+@media (max-width: 720px) {
+  .post-nav { grid-template-columns: 1fr; }
+  .post-nav-link.next { text-align: left; }
+}

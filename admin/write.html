@@ -278,6 +278,25 @@
       }
     }
 
+
+    async function convertImageToWebp(file) {
+      if (file.type === 'image/webp') return file;
+      if (!/^image\/(jpeg|jpg|png)$/i.test(file.type)) {
+        throw new Error('JPG, PNG, WebP 이미지만 업로드할 수 있습니다.');
+      }
+      const bitmap = await createImageBitmap(file);
+      const canvas = document.createElement('canvas');
+      canvas.width = bitmap.width;
+      canvas.height = bitmap.height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(bitmap, 0, 0);
+      if (bitmap.close) bitmap.close();
+      const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/webp', 0.82));
+      if (!blob) throw new Error('이미지를 WebP로 변환하지 못했습니다.');
+      const baseName = file.name.replace(/\.[^.]+$/, '').replace(/[^a-zA-Z0-9가-힣_-]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '') || 'image';
+      return new File([blob], baseName + '.webp', { type: 'image/webp' });
+    }
+
     async function uploadOne(file) {
       const localPreviewUrl = URL.createObjectURL(file);
       const item = document.createElement('div');
@@ -290,9 +309,10 @@
       previewList.appendChild(item);
 
       try {
-        if (file.size > 5 * 1024 * 1024) throw new Error('이미지는 5MB 이하로 올려주세요.');
+        const webpFile = await convertImageToWebp(file);
+        if (webpFile.size > 5 * 1024 * 1024) throw new Error('WebP 변환 후 이미지가 5MB를 넘습니다. 더 작은 이미지를 올려주세요.');
         const formData = new FormData();
-        formData.append('image', file);
+        formData.append('image', webpFile);
         const res = await fetch('/api/upload-image', {
           method: 'POST',
           headers: { Authorization: `Bearer ${token()}` },
@@ -301,7 +321,7 @@
         const data = await res.json();
         if (!res.ok || !data.ok) throw new Error(data.message || '이미지 업로드에 실패했습니다.');
 
-        text.textContent = '업로드 완료';
+        text.textContent = 'WebP 업로드 완료';
         insertImage(data.url, data.alt || '', localPreviewUrl);
         return true;
       } catch (error) {

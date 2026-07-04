@@ -52,9 +52,9 @@ async function handleUploadImage(request, env) {
   const now = new Date();
   const yyyy = String(now.getFullYear());
   const mm = String(now.getMonth() + 1).padStart(2, '0');
-  const ext = imageExtension(file.name, file.type);
+  if (file.type !== 'image/webp') return json({ ok: false, message: '이미지는 WebP로 변환된 파일만 저장할 수 있습니다.' }, 400);
   const baseName = safeFileName(file.name.replace(/\.[^.]+$/, '')) || 'image';
-  const path = `uploads/${yyyy}/${mm}/${Date.now()}-${baseName}.${ext}`;
+  const path = `uploads/${yyyy}/${mm}/${Date.now()}-${baseName}.webp`;
   const contentBase64 = arrayBufferToBase64(await file.arrayBuffer());
 
   await commitFiles(env, `upload image ${path}`, [
@@ -91,7 +91,7 @@ async function handleCreatePost(request, env) {
 
   const files = [
     { path: 'data/posts.json', content: JSON.stringify(nextPosts, null, 2), encoding: 'utf-8' },
-    { path, content: renderPostPage(env, newPost, contentHtml), encoding: 'utf-8' },
+    { path, content: renderPostPage(env, newPost, contentHtml, nextPosts), encoding: 'utf-8' },
     { path: 'ab-qna/index.html', content: renderListPage(env, nextPosts), encoding: 'utf-8' },
     { path: 'index.html', content: renderHomePage(env, nextPosts), encoding: 'utf-8' },
     { path: 'sitemap.xml', content: renderSitemap(env, nextPosts), encoding: 'utf-8' },
@@ -360,6 +360,36 @@ function extractFirstImageUrl(env, html) {
   return match ? absoluteUrl(env, match[1]) : '';
 }
 
+function createArticleJsonLd(env, post) {
+  const url = `${trimSlash(env.SITE_URL)}/${post.path}`;
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: post.title,
+    description: post.excerpt || '',
+    datePublished: post.createdAt || '',
+    dateModified: post.updatedAt || post.createdAt || '',
+    mainEntityOfPage: { '@type': 'WebPage', '@id': url },
+    url,
+    author: { '@type': 'Organization', name: '올딜 생활게시판' },
+    publisher: { '@type': 'Organization', name: '올딜 생활게시판' }
+  };
+}
+
+function renderArticleNav(posts, currentPost) {
+  const sorted = posts.slice().sort((a, b) => Number(a.id) - Number(b.id));
+  const index = sorted.findIndex((post) => Number(post.id) === Number(currentPost.id));
+  const prev = index > 0 ? sorted[index - 1] : null;
+  const next = index >= 0 && index < sorted.length - 1 ? sorted[index + 1] : null;
+  const link = (className, label, post) => post
+    ? `<a class="post-nav-link ${className}" href="/${escapeHtml(post.path)}"><span>${label}</span><strong>${escapeHtml(post.title)}</strong></a>`
+    : `<span class="post-nav-link ${className} disabled"><span>${label}</span><strong>글이 없습니다</strong></span>`;
+  return `      <nav class="post-nav" aria-label="이전글 다음글">
+        ${link('prev', '이전글', prev)}
+        ${link('next', '다음글', next)}
+      </nav>`;
+}
+
 function layout(env, title, description, body, canonicalPath = '/', options = {}) {
   const site = trimSlash(env.SITE_URL);
   const canonicalUrl = site + canonicalPath;
@@ -368,7 +398,10 @@ function layout(env, title, description, body, canonicalPath = '/', options = {}
   <meta property="og:image" content="${escapeHtml(options.ogImage)}">
   <meta name="twitter:image" content="${escapeHtml(options.ogImage)}">` : '';
   const articleMeta = options.publishedTime ? `
-  <meta property="article:published_time" content="${escapeHtml(options.publishedTime)}">` : '';
+  <meta property="article:published_time" content="${escapeHtml(options.publishedTime)}">
+  <meta property="article:modified_time" content="${escapeHtml(options.modifiedTime || options.publishedTime)}">` : '';
+  const jsonLd = options.jsonLd ? `
+  <script type="application/ld+json">${safeScriptJson(options.jsonLd)}</script>` : '';
   return `<!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -386,7 +419,7 @@ function layout(env, title, description, body, canonicalPath = '/', options = {}
   <meta name="twitter:title" content="${escapeHtml(title)}">
   <meta name="twitter:description" content="${escapeHtml(description)}">
   <link rel="canonical" href="${escapeHtml(canonicalUrl)}">
-  <link rel="stylesheet" href="/assets/style.css">
+  <link rel="stylesheet" href="/assets/style.css">${jsonLd}
 </head>
 <body>
   <header class="site-header">
@@ -609,30 +642,37 @@ ${renderRows(posts.slice(0, 20))}
   return layout(env, '올딜 생활게시판', '생활 서비스 문의와 안내를 모아둔 올딜 생활게시판입니다.', body, '/');
 }
 
-function renderPostPage(env, post, contentHtml) {
+function renderPostPage(env, post, contentHtml, posts = []) {
   const body = `    <article class="card post-wrap">
       <h1 class="post-title">${escapeHtml(post.title)}</h1>
-      <div class="post-meta">작성자 관리자 · 작성일 ${displayDate(post.createdAt)}</div>
+      <div class="post-meta">작성자 관리자 · <time datetime="${escapeHtml(post.createdAt)}">작성일 ${displayDate(post.createdAt)}</time></div>
       <div class="post-content">
 ${contentHtml}
       </div>
+${renderArticleNav(posts, post)}
       <p style="margin-top:28px"><a class="btn btn-light" href="/ab-qna/">목록으로</a></p>
     </article>`;
-  return layout(env, post.title, post.excerpt, body, `/${post.path}`, { ogType: 'article', ogImage: extractFirstImageUrl(env, contentHtml), publishedTime: post.createdAt });
+  return layout(env, post.title, post.excerpt, body, `/${post.path}`, {
+    ogType: 'article',
+    ogImage: extractFirstImageUrl(env, contentHtml),
+    publishedTime: post.createdAt,
+    modifiedTime: post.updatedAt || post.createdAt,
+    jsonLd: createArticleJsonLd(env, post)
+  });
 }
 
 function renderSitemap(env, posts) {
   const site = trimSlash(env.SITE_URL);
   const base = [
-    { loc: `${site}/`, changefreq: 'daily', priority: '0.8' },
-    { loc: `${site}/ab-qna/`, changefreq: 'hourly', priority: '0.9' }
+    { loc: `${site}/`, changefreq: 'daily', priority: '0.8', lastmod: new Date().toISOString().slice(0, 10) },
+    { loc: `${site}/ab-qna/`, changefreq: 'hourly', priority: '0.9', lastmod: new Date().toISOString().slice(0, 10) }
   ];
-  const urls = base.concat(posts.map((post) => ({ loc: `${site}/${post.path}`, changefreq: 'weekly', priority: '0.7' })));
+  const urls = base.concat(posts.map((post) => ({ loc: `${site}/${post.path}`, changefreq: 'weekly', priority: '0.7', lastmod: String(post.updatedAt || post.createdAt || '').slice(0, 10) })));
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls.map((url) => `  <url>
     <loc>${escapeHtml(url.loc)}</loc>
-    <changefreq>${url.changefreq}</changefreq>
+    ${url.lastmod ? `<lastmod>${escapeHtml(url.lastmod)}</lastmod>\n    ` : ''}<changefreq>${url.changefreq}</changefreq>
     <priority>${url.priority}</priority>
   </url>`).join('\n')}
 </urlset>
