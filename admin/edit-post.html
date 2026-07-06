@@ -265,7 +265,7 @@
         const data = await res.json();
         if (!res.ok || !data.ok) throw new Error(data.message || '이미지 업로드에 실패했습니다.');
         text.textContent = 'WebP 업로드 완료';
-        insertImage(data.url, data.alt || '', localPreviewUrl);
+        insertImage(data.url, data.alt || '', data.url);
         return true;
       } catch (error) {
         text.textContent = '업로드 실패'; uploadStatus.className = 'status err'; uploadStatus.textContent = error.message; URL.revokeObjectURL(localPreviewUrl); return false;

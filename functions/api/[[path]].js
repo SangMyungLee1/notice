@@ -92,8 +92,9 @@ async function handleCreatePost(request, env) {
   const slug = `${board.prefix || board.path || 'ab-qna'}_v-${nextId}.html`;
   const path = `${board.path || 'ab-qna'}/${slug}`;
   const excerpt = createExcerpt(contentHtml, 135);
+  const seoSource = createExcerpt(contentHtml, 280);
   const imageUrls = extractImageUrls(env, contentHtml);
-  const seo = createSeoPackage({ title, excerpt, board, id: nextId, path, createdAt, imageUrls });
+  const seo = createSeoPackage({ title, excerpt: seoSource, board, id: nextId, path, createdAt, imageUrls });
   const newPost = {
     id: nextId,
     title,
@@ -154,10 +155,11 @@ async function handleUpdatePost(request, env) {
   let contentHtml = sanitizeAdminHtml(rawContent);
   contentHtml = enrichContentImages(contentHtml, title, board, id);
   const excerpt = createExcerpt(contentHtml, 135);
+  const seoSource = createExcerpt(contentHtml, 280);
   const imageUrls = extractImageUrls(env, contentHtml);
   const seo = createSeoPackage({
     title,
-    excerpt,
+    excerpt: seoSource,
     board,
     id,
     path: current.path,
@@ -536,47 +538,86 @@ function clipSentence(value, max) {
   return text.length > max ? `${text.slice(0, max - 1)}…` : text;
 }
 
+function splitSeoSentences(value) {
+  const text = cleanText(value);
+  if (!text) return [];
+  return text
+    .split(/(?<=[.!?。！？]|다\.|요\.|니다\.|죠\.|습니다\.)\s+|[\n\r]+/)
+    .map((item) => cleanText(item.replace(/["'<>]/g, '')))
+    .filter((item) => item.length >= 8);
+}
+
+function fallbackSentence(title, boardName) {
+  return `${title}에 대한 내용을 ${boardName} 성격에 맞춰 읽기 쉽게 정리했습니다.`;
+}
+
+function composeSeoDescription(parts, suffix, max) {
+  const base = parts.filter(Boolean).join(' ');
+  return clipSentence(`${base} ${suffix}`.trim(), max);
+}
+
 function createSeoPackage({ title, excerpt, board, id, path, createdAt, imageUrls }) {
   const boardName = board?.name || '생활게시판';
-  const base = normalizeForSeoText(excerpt, 110) || `${title} 관련 내용을 ${boardName}에서 확인할 수 있습니다.`;
+  const cleanTitle = cleanText(title);
+  const contentText = normalizeForSeoText(excerpt, 260) || fallbackSentence(cleanTitle, boardName);
+  let sentences = splitSeoSentences(contentText);
+  if (!sentences.length) sentences = [fallbackSentence(cleanTitle, boardName)];
+  const first = sentences[0] || fallbackSentence(cleanTitle, boardName);
+  const second = sentences[1] || `${boardName}에서 확인하기 좋은 핵심 내용을 함께 담았습니다.`;
+  const third = sentences[2] || `${cleanTitle} 관련 정보를 찾는 분이 빠르게 이해할 수 있도록 구성했습니다.`;
   const seed = Number(id) || Date.now();
   const pageTitle = pickVariant([
-    `${title} | ${boardName}`,
-    `${title} - ${boardName} 안내`,
-    `${boardName}에서 보는 ${title}`
+    `${cleanTitle} | ${boardName}`,
+    `${cleanTitle} - ${boardName} 안내`,
+    `${boardName}에서 보는 ${cleanTitle}`,
+    `${cleanTitle} 정보 정리`
   ], seed);
-  const metaDescription = clipSentence(pickVariant([
-    `${base} 핵심 내용을 부담 없이 읽을 수 있도록 정리했습니다.`,
-    `${title}에 대해 궁금한 부분을 빠르게 훑어볼 수 있게 구성한 글입니다.`,
-    `${boardName} 주제에 맞춰 ${title} 내용을 자연스럽게 풀어낸 게시글입니다.`
-  ], seed + 1), 155);
-  const ogDescription = clipSentence(pickVariant([
-    `${title} 관련 내용을 이야기 흐름으로 정리했습니다. 필요한 정보만 가볍게 확인해보세요.`,
-    `${boardName}에서 다루는 ${title} 글입니다. 검색자가 궁금해할 만한 포인트를 중심으로 담았습니다.`,
-    `${base} 읽기 편한 문장으로 구성해 처음 보는 분도 쉽게 따라갈 수 있습니다.`
-  ], seed + 2), 165);
-  const twitterDescription = clipSentence(pickVariant([
-    `${title} 요점을 짧게 확인하고 이어서 본문에서 자세한 내용을 볼 수 있습니다.`,
-    `${boardName} 최신 글로 등록된 ${title} 안내입니다.`,
-    `${base} 모바일에서도 읽기 좋게 정리했습니다.`
-  ], seed + 3), 150);
-  const jsonLdDescription = clipSentence(pickVariant([
-    `${title} 게시글은 ${boardName} 성격에 맞춰 주제 설명과 읽을거리를 함께 제공하는 문서입니다.`,
-    `${boardName}에 등록된 ${title} 콘텐츠로, 본문과 이미지 정보를 포함해 구성된 글입니다.`,
-    `${title}에 대한 본문 내용을 바탕으로 작성일, 게시판, 이미지 정보를 함께 제공하는 Article 문서입니다.`
-  ], seed + 4), 170);
+  const metaDescription = composeSeoDescription([
+    first,
+    pickVariant([
+      `${cleanTitle}의 핵심 흐름을 본문 기준으로 요약했습니다.`,
+      `검색자가 먼저 확인할 만한 부분을 중심으로 구성했습니다.`,
+      `${boardName} 주제와 이어지는 내용을 자연스럽게 담았습니다.`
+    ], seed + 1)
+  ], '', 155);
+  const ogDescription = composeSeoDescription([
+    second,
+    pickVariant([
+      `${cleanTitle}을 공유했을 때 내용이 바로 이해되도록 정리했습니다.`,
+      `본문의 분위기와 요점을 살려 소개 문구를 구성했습니다.`,
+      `${boardName}에서 다루는 글이라는 점을 함께 드러냈습니다.`
+    ], seed + 2)
+  ], '', 165);
+  const twitterDescription = composeSeoDescription([
+    third,
+    pickVariant([
+      `짧게 훑고 본문에서 자세히 확인할 수 있습니다.`,
+      `모바일 화면에서도 핵심이 먼저 보이도록 줄였습니다.`,
+      `필요한 내용을 빠르게 찾기 좋게 요약했습니다.`
+    ], seed + 3)
+  ], '', 150);
+  const jsonLdDescription = composeSeoDescription([
+    first,
+    second,
+    pickVariant([
+      `이 구조화 데이터는 게시글 제목, 본문 요약, 게시판, 이미지 정보를 함께 설명합니다.`,
+      `Article 문서로 인식될 수 있도록 본문 기반 설명과 게시판 분류를 포함했습니다.`,
+      `검색엔진이 글의 주제와 문서 성격을 이해하도록 본문 요약을 반영했습니다.`
+    ], seed + 4)
+  ], '', 170);
   const keywordSet = Array.from(new Set([
-    title,
+    cleanTitle,
     boardName.replace(/ 게시판$/, ''),
     boardName,
-    ...String(title).split(/[\s,·|/]+/).filter((word) => word.length > 1).slice(0, 5)
-  ])).slice(0, 8);
+    ...String(cleanTitle).split(/[\s,·|/]+/).filter((word) => word.length > 1).slice(0, 5),
+    ...contentText.split(/[\s,·|/]+/).filter((word) => word.length >= 2 && word.length <= 12).slice(0, 6)
+  ])).slice(0, 10);
   return {
     pageTitle,
     metaDescription,
-    ogTitle: pickVariant([title, `${title} 안내`, `${boardName} ${title}`], seed + 5),
+    ogTitle: pickVariant([cleanTitle, `${cleanTitle} 안내`, `${boardName} ${cleanTitle}`], seed + 5),
     ogDescription,
-    twitterTitle: pickVariant([title, `${title} 요약`, `${boardName} 글 보기`], seed + 6),
+    twitterTitle: pickVariant([cleanTitle, `${cleanTitle} 요약`, `${boardName} 글 보기`], seed + 6),
     twitterDescription,
     jsonLdDescription,
     keywords: keywordSet.join(', '),
@@ -792,17 +833,7 @@ function renderListSection(posts, boards, board = null, includeCards = false) {
   const title = board ? board.name : '최근 게시글';
   const desc = board ? board.description : '생활 서비스 관련 글을 게시판 형식으로 확인할 수 있습니다.';
   const staticRows = renderStaticBoardRows(posts, filterSlug, 10);
-  const staticCards = renderStaticBoardCards(posts, boards);
-  const cards = includeCards ? `    <section class="board-card-section">
-      <div class="board-section-head">
-        <h2 class="section-title">게시판 바로가기</h2>
-        <p>원하는 주제의 게시판으로 이동해서 글을 확인할 수 있습니다.</p>
-      </div>
-      <div id="boardCards" class="board-card-grid">
-${staticCards}
-      </div>
-    </section>
-` : '';
+  const cards = '';
   return `${cards}    <section class="card post-wrap">
       <div class="board-toolbar">
         <div>
