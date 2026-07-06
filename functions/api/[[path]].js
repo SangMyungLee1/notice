@@ -740,7 +740,12 @@ function layout(env, title, description, body, canonicalPath = '/', options = {}
   <meta property="article:modified_time" content="${escapeHtml(options.modifiedTime || options.publishedTime)}">` : '';
   const jsonLd = options.jsonLd ? `
   <script type="application/ld+json">${safeScriptJson(options.jsonLd)}</script>` : '';
-  const nav = visibleBoards(boards).map((board) => `<a href="/${escapeHtml(board.path)}/">${escapeHtml(board.name)}</a>`).join('\n        ');
+  const activeNav = options.activeNav || (canonicalPath === '/' ? 'home' : '');
+  const homeNavAttr = activeNav === 'home' ? ' class="nav-active nav-current" aria-current="page"' : '';
+  const nav = visibleBoards(boards).map((board) => {
+    const activeAttr = activeNav === board.slug ? ' class="nav-active nav-current" aria-current="page"' : '';
+    return `<a href="/${escapeHtml(board.path)}/"${activeAttr}>${escapeHtml(board.name)}</a>`;
+  }).join('\n        ');
   return `<!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -758,7 +763,7 @@ function layout(env, title, description, body, canonicalPath = '/', options = {}
   <meta name="twitter:title" content="${escapeHtml(twitterTitle)}">
   <meta name="twitter:description" content="${escapeHtml(twitterDescription)}">
   <link rel="canonical" href="${escapeHtml(canonicalUrl)}">
-  <link rel="stylesheet" href="/assets/style.css">${jsonLd}
+  <link rel="stylesheet" href="/assets/style.css?v=20260706-navstrong2">${jsonLd}
 </head>
 <body>
   <header class="site-header">
@@ -767,7 +772,7 @@ function layout(env, title, description, body, canonicalPath = '/', options = {}
       <h1 class="hero-title">생활 서비스 문의와 안내를 모아둔 게시판</h1>
       <p class="hero-desc">포장이사, 인터넷가입, 정수기렌탈, 렌트카처럼 비교가 필요한 생활 정보를 게시판별로 정리합니다.</p>
       <nav class="nav">
-        <a href="/">홈</a>
+        <a href="/"${homeNavAttr}>홈</a>
         ${nav}
         <a href="/admin/password.html">글쓰기</a>
       </nav>
@@ -837,7 +842,7 @@ function renderListSection(posts, boards, board = null, includeCards = false) {
   return `${cards}    <section class="card post-wrap">
       <div class="board-toolbar">
         <div>
-          <h2 class="section-title">${escapeHtml(title)}</h2>
+          <h2 class="section-title${board ? ' board-current-title' : ''}">${escapeHtml(title)}</h2>
           <p style="margin:0;color:var(--muted)">${escapeHtml(desc)}</p>
         </div>
         <a class="btn btn-primary" href="/admin/password.html${board ? `?next=${encodeURIComponent(`/admin/write.html?board=${board.slug}`)}` : ''}">글쓰기</a>
@@ -857,17 +862,17 @@ ${staticRows}
         window.NOTICE_BOARD_FILTER = ${safeScriptJson(filterSlug)};
         window.NOTICE_PAGE_BASE = ${safeScriptJson(base)};
       </script>
-      <script src="/assets/board.js?v=20260706-searchfix1"></script>
+      <script src="/assets/board.js?v=20260706-navstrong2"></script>
     </section>`;
 }
 
 
 function renderBoardIndexPage(env, posts, boards, board) {
-  return layout(env, `올딜 ${board.name}`, board.description || `${board.name} 최신 글 목록입니다.`, renderListSection(posts, boards, board, false), `/${board.path}/`, {}, boards);
+  return layout(env, `올딜 ${board.name}`, board.description || `${board.name} 최신 글 목록입니다.`, renderListSection(posts, boards, board, false), `/${board.path}/`, { activeNav: board.slug }, boards);
 }
 
 function renderHomePage(env, posts, boards = defaultBoards()) {
-  return layout(env, '올딜 생활게시판', '생활 서비스 문의와 안내를 게시판별로 나누어 확인할 수 있는 올딜 생활게시판입니다.', renderListSection(posts, boards, null, true), '/', {}, boards);
+  return layout(env, '올딜 생활게시판', '생활 서비스 문의와 안내를 게시판별로 나누어 확인할 수 있는 올딜 생활게시판입니다.', renderListSection(posts, boards, null, true), '/', { activeNav: 'home' }, boards);
 }
 
 function renderPostPage(env, post, contentHtml, posts = [], boards = defaultBoards()) {
@@ -907,7 +912,8 @@ ${renderArticleNav(posts, post)}
     ogImageAlt: `${post.title} 대표 이미지`,
     publishedTime: post.createdAt,
     modifiedTime: post.updatedAt || post.createdAt,
-    jsonLd: createArticleJsonLd(env, { ...post, seo }, board)
+    jsonLd: createArticleJsonLd(env, { ...post, seo }, board),
+    activeNav: board.slug
   }, boards);
 }
 

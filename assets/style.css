@@ -99,16 +99,44 @@ a:hover { color: var(--point); }
 }
 
 .nav a:hover { color: #fff; background: rgba(255,255,255,0.2); }
-.nav a.nav-active {
-  background: #ffffff;
-  color: #1e3a8a;
-  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.2);
-  font-weight: 900;
+
+.nav a.nav-active,
+.nav a[aria-current="page"],
+.nav a.nav-current {
+  background: linear-gradient(135deg, #facc15 0%, #fb923c 100%);
+  color: #111827;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.28);
+  font-weight: 950;
+  font-size: 16px;
+  padding: 13px 23px;
+  transform: translateY(-2px) scale(1.06);
+  border: 2px solid rgba(255,255,255,0.92);
 }
 
-.nav a.nav-active:hover {
-  background: #ffffff;
-  color: #1e3a8a;
+.nav a.nav-active:hover,
+.nav a[aria-current="page"]:hover,
+.nav a.nav-current:hover {
+  background: linear-gradient(135deg, #fde047 0%, #f97316 100%);
+  color: #111827;
+  opacity: 1;
+}
+
+.section-title.board-current-title {
+  font-weight: 950;
+  color: #111827;
+  letter-spacing: -0.04em;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.section-title.board-current-title::before {
+  content: '';
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #f97316;
+  box-shadow: 0 0 0 5px rgba(249, 115, 22, 0.14);
 }
 
 .btn:hover { transform: translateY(-1px); }
