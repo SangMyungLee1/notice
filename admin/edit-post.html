@@ -259,17 +259,22 @@
       const localPreviewUrl = URL.createObjectURL(file);
       const item = document.createElement('div'); item.className = 'preview-item';
       const thumb = document.createElement('img'); thumb.src = localPreviewUrl;
-      const text = document.createElement('span'); text.textContent = '업로드 중...';
+      const text = document.createElement('span'); text.textContent = 'WebP 변환 및 업로드 중...';
       item.append(thumb, text); previewList.appendChild(item);
       try {
         const webpFile = await convertImageToWebp(file);
         if (webpFile.size > 5 * 1024 * 1024) throw new Error('WebP 변환 후 이미지가 5MB를 넘습니다. 더 작은 이미지를 올려주세요.');
+        const webpPreviewUrl = URL.createObjectURL(webpFile);
+        thumb.src = webpPreviewUrl;
+        URL.revokeObjectURL(localPreviewUrl);
         const formData = new FormData(); formData.append('image', webpFile);
         const res = await fetch('/api/upload-image', { method: 'POST', headers: { Authorization: `Bearer ${token()}` }, body: formData });
         const data = await res.json();
         if (!res.ok || !data.ok) throw new Error(data.message || '이미지 업로드에 실패했습니다.');
+        const savedUrl = data.url || data.path || '';
+        if (!savedUrl) throw new Error('업로드된 이미지 경로를 받지 못했습니다.');
         text.textContent = 'WebP 업로드 완료';
-        insertImage(data.url, data.alt || '', data.url);
+        insertImage(savedUrl, data.alt || '', webpPreviewUrl);
         return true;
       } catch (error) {
         text.textContent = '업로드 실패'; uploadStatus.className = 'status err'; uploadStatus.textContent = error.message; URL.revokeObjectURL(localPreviewUrl); return false;

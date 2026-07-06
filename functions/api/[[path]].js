@@ -66,7 +66,8 @@ async function handleUploadImage(request, env) {
   return json({
     ok: true,
     path,
-    url: `${trimSlash(env.SITE_URL)}/${path}`,
+    url: `/${path}`,
+    absoluteUrl: `${trimSlash(env.SITE_URL)}/${path}`,
     alt: file.name.replace(/\.[^.]+$/, '')
   });
 }
