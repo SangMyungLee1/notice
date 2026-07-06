@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>게시판 수정</title>
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <main class="admin-wrap">
+    <section class="admin-card">
+      <h1>게시판 수정</h1>
+      <p>게시판 이름, 설명, 메인 노출 여부를 수정합니다.</p>
+      <form id="boardForm">
+        <div class="form-row">
+          <label class="label" for="boardName">게시판 이름</label>
+          <input class="input" id="boardName" type="text" maxlength="40" required>
+        </div>
+        <div class="form-row">
+          <label class="label" for="boardDescription">게시판 설명</label>
+          <textarea class="textarea" id="boardDescription" rows="4" maxlength="160"></textarea>
+        </div>
+        <div class="form-row">
+          <label class="label" for="boardOrder">노출 순서</label>
+          <input class="input" id="boardOrder" type="number" min="1" max="99">
+        </div>
+        <label class="check-row"><input id="boardVisible" type="checkbox"> 메인에 게시판 노출</label>
+        <button class="btn btn-primary" type="submit">수정 저장</button>
+        <a id="backLink" class="btn btn-light" href="/">돌아가기</a>
+        <div id="status" class="status" role="status"></div>
+      </form>
+    </section>
+  </main>
+  <script>
+    const tokenKey = 'notice_admin_token';
+    const token = () => localStorage.getItem(tokenKey) || '';
+    const params = new URLSearchParams(location.search);
+    const slug = params.get('board') || 'free';
+    const statusEl = document.getElementById('status');
+    let currentBoard = null;
+
+    async function verifySession() {
+      try {
+        const res = await fetch('/api/verify', { headers: { Authorization: `Bearer ${token()}` } });
+        const data = await res.json();
+        if (!res.ok || !data.ok) throw new Error('인증 필요');
+      } catch (_) {
+        localStorage.removeItem(tokenKey);
+        location.replace('/admin/password.html?next=' + encodeURIComponent(location.pathname + location.search));
+      }
+    }
+    async function loadBoard() {
+      const res = await fetch('/data/boards.json?ts=' + Date.now(), { cache: 'no-store' });
+      const boards = await res.json();
+      currentBoard = boards.find((item) => item.slug === slug);
+      if (!currentBoard) throw new Error('게시판을 찾을 수 없습니다.');
+      document.getElementById('boardName').value = currentBoard.name || '';
+      document.getElementById('boardDescription').value = currentBoard.description || '';
+      document.getElementById('boardOrder').value = currentBoard.order || 1;
+      document.getElementById('boardVisible').checked = currentBoard.visible !== false;
+      document.getElementById('backLink').href = '/' + currentBoard.path + '/';
+    }
+    function setStatus(msg,type){ statusEl.className = 'status ' + (type || ''); statusEl.textContent = msg; }
+    document.getElementById('boardForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if(!currentBoard) return;
+      setStatus('저장 중입니다.', '');
+      try {
+        const body = {
+          slug,
+          name: document.getElementById('boardName').value.trim(),
+          description: document.getElementById('boardDescription').value.trim(),
+          order: Number(document.getElementById('boardOrder').value || 1),
+          visible: document.getElementById('boardVisible').checked
+        };
+        const res = await fetch('/api/update-board', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
+          body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        if(!res.ok || !data.ok) throw new Error(data.message || '저장에 실패했습니다.');
+        setStatus('저장되었습니다. 게시판 화면으로 이동합니다.', 'ok');
+        setTimeout(() => { location.href = '/' + data.board.path + '/'; }, 500);
+      } catch (error) { setStatus(error.message, 'err'); }
+    });
+    verifySession().then(loadBoard).catch((error) => setStatus(error.message, 'err'));
+  </script>
+</body>
+</html>

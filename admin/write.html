@@ -11,7 +11,7 @@
   <main class="admin-wrap">
     <section class="admin-card wide">
       <h1>게시글 작성</h1>
-      <p>이미지는 제목 입력칸보다 위에 있는 버튼으로 먼저 업로드할 수 있습니다. 여러 장을 한 번에 끌어다 놓으면 순서대로 본문에 삽입됩니다.</p>
+      <p>이미지는 제목 입력칸보다 위에 있는 버튼으로 먼저 업로드할 수 있습니다. 저장할 때 메타 설명, OG 설명, 구조화 데이터, 이미지 alt/title/caption은 게시글별로 자동 생성됩니다.</p>
 
       <div class="form-row">
         <button id="openImageModal" class="btn btn-primary" type="button">이미지 추가</button>
@@ -19,6 +19,16 @@
       </div>
 
       <form id="postForm">
+        <div class="form-row">
+          <label class="label" for="boardSelect">게시판 선택</label>
+          <select class="input" id="boardSelect" required>
+            <option value="free">자유게시판</option>
+            <option value="moving">포장이사 게시판</option>
+            <option value="internet">인터넷가입 게시판</option>
+            <option value="water">정수기렌탈 게시판</option>
+            <option value="rentcar">렌트카 게시판</option>
+          </select>
+        </div>
         <div class="form-row">
           <label class="label" for="title">제목</label>
           <input class="input" id="title" type="text" maxlength="90" placeholder="게시글 제목을 입력하세요" required>
@@ -77,6 +87,9 @@
     const saveButtons = [submitButton, topSaveBtn].filter(Boolean);
     let selectedImage = null;
     let savedRange = null;
+    const writeParams = new URLSearchParams(location.search);
+    const requestedBoard = writeParams.get('board');
+    if (requestedBoard && document.getElementById('boardSelect')) document.getElementById('boardSelect').value = requestedBoard;
 
     function lockEditorScrollBox() {
       editor.style.height = '600px';
@@ -196,7 +209,7 @@
 
     document.getElementById('logoutBtn').addEventListener('click', () => {
       localStorage.removeItem(tokenKey);
-      location.href = '/ab-qna/';
+      location.href = '/';
     });
 
     document.querySelectorAll('[data-command]').forEach((btn) => {
@@ -378,7 +391,7 @@
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token()}`
           },
-          body: JSON.stringify({ title, contentHtml })
+          body: JSON.stringify({ title, contentHtml, board: document.getElementById('boardSelect').value })
         });
         const data = await res.json();
         if (!res.ok || !data.ok) throw new Error(data.message || '저장에 실패했습니다.');
@@ -388,13 +401,15 @@
           title,
           slug: data.slug || (data.path ? data.path.split('/').pop() : ''),
           path: data.path,
+          board: data.board || document.getElementById('boardSelect').value,
+          boardName: data.boardName || '',
           createdAt: data.createdAt || new Date().toISOString(),
           excerpt: data.excerpt || plainText.slice(0, 135),
           searchText: data.searchText || plainText,
           savedAtMs: Date.now()
         });
         setSaveStatus('', '');
-        location.href = '/ab-qna/?fresh=' + encodeURIComponent(data.id || Date.now());
+        location.href = '/' + (data.boardPath || 'ab-qna') + '/?fresh=' + encodeURIComponent(data.id || Date.now());
       } catch (error) {
         saveButtons.forEach((button) => button.disabled = false);
         setSaveStatus(error.message, 'err');

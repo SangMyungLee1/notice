@@ -1,0 +1,47 @@
+[
+  {
+    "slug": "free",
+    "name": "자유게시판",
+    "path": "ab-qna",
+    "prefix": "ab-qna",
+    "description": "생활 서비스와 자유로운 정보를 함께 모아두는 기본 게시판입니다.",
+    "order": 1,
+    "visible": true
+  },
+  {
+    "slug": "moving",
+    "name": "포장이사 게시판",
+    "path": "moving",
+    "prefix": "moving",
+    "description": "포장이사 비용, 업체 비교, 견적 확인 방법을 정리하는 게시판입니다.",
+    "order": 2,
+    "visible": true
+  },
+  {
+    "slug": "internet",
+    "name": "인터넷가입 게시판",
+    "path": "internet",
+    "prefix": "internet",
+    "description": "인터넷가입, 인터넷설치, 인터넷변경 조건과 혜택을 다루는 게시판입니다.",
+    "order": 3,
+    "visible": true
+  },
+  {
+    "slug": "water",
+    "name": "정수기렌탈 게시판",
+    "path": "water",
+    "prefix": "water",
+    "description": "정수기렌탈 제품, 비용, 관리 조건을 비교해보는 게시판입니다.",
+    "order": 4,
+    "visible": true
+  },
+  {
+    "slug": "rentcar",
+    "name": "렌트카 게시판",
+    "path": "rentcar",
+    "prefix": "rentcar",
+    "description": "장기렌트카와 차량 이용 조건을 살펴보는 게시판입니다.",
+    "order": 5,
+    "visible": true
+  }
+]
