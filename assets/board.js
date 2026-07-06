@@ -9,6 +9,7 @@
   var allPosts = [];
   var boards = [];
   var list = document.getElementById('boardList');
+  var initialListHtml = list ? list.innerHTML : '';
   var pagination = document.getElementById('boardPagination');
   var empty = document.getElementById('boardEmpty');
   var form = document.getElementById('boardSearchForm');
@@ -65,7 +66,10 @@
   }
   function renderRows(rows) {
     if(!list) return;
-    if(!rows.length) { list.innerHTML=''; if(empty) empty.classList.add('active'); return; }
+    if(!rows.length) {
+      if(initialListHtml && !currentQuery) { list.innerHTML = initialListHtml; if(empty) empty.classList.remove('active'); return; }
+      list.innerHTML=''; if(empty) empty.classList.add('active'); return;
+    }
     if(empty) empty.classList.remove('active');
     list.innerHTML = rows.map(function(post){
       return '<div class="board-row">' +
@@ -120,11 +124,11 @@
     allPosts=fallbackPosts; boards=fallbackBoards;
     try {
       var postRes=await fetch('/data/posts.json?ts=' + Date.now(), {cache:'no-store'});
-      if(postRes.ok) allPosts=await postRes.json();
+      if(postRes.ok) { var fetchedPosts = await postRes.json(); if(Array.isArray(fetchedPosts)) allPosts=fetchedPosts; }
     } catch(_) {}
     try {
       var boardRes=await fetch('/data/boards.json?ts=' + Date.now(), {cache:'no-store'});
-      if(boardRes.ok) boards=await boardRes.json();
+      if(boardRes.ok) { var fetchedBoards = await boardRes.json(); if(Array.isArray(fetchedBoards)) boards=fetchedBoards; }
     } catch(_) {}
     if(!Array.isArray(allPosts)) allPosts=[]; if(!Array.isArray(boards)) boards=[];
     allPosts=mergePendingPosts(allPosts);
