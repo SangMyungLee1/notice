@@ -5,11 +5,38 @@
 /api/*
   Cache-Control: no-store
 
+/data/*
+  Cache-Control: no-store, max-age=0, must-revalidate
+
 /ab-qna/
-  Cache-Control: max-age=0, must-revalidate
+  Cache-Control: no-store, max-age=0, must-revalidate
 
 /ab-qna/*
-  Cache-Control: max-age=0, must-revalidate
+  Cache-Control: no-store, max-age=0, must-revalidate
+
+/moving/
+  Cache-Control: no-store, max-age=0, must-revalidate
+
+/moving/*
+  Cache-Control: no-store, max-age=0, must-revalidate
+
+/internet/
+  Cache-Control: no-store, max-age=0, must-revalidate
+
+/internet/*
+  Cache-Control: no-store, max-age=0, must-revalidate
+
+/water/
+  Cache-Control: no-store, max-age=0, must-revalidate
+
+/water/*
+  Cache-Control: no-store, max-age=0, must-revalidate
+
+/rentcar/
+  Cache-Control: no-store, max-age=0, must-revalidate
+
+/rentcar/*
+  Cache-Control: no-store, max-age=0, must-revalidate
 
 /assets/*
-  Cache-Control: max-age=0, must-revalidate
+  Cache-Control: no-store, max-age=0, must-revalidate

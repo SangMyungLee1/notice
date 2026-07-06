@@ -749,17 +749,58 @@ function safeScriptJson(value) {
     .replace(/\u2029/g, '\\u2029');
 }
 
+function sortPostsForList(posts) {
+  return posts.slice().sort((a, b) => {
+    const aid = Number(a.id) || 0;
+    const bid = Number(b.id) || 0;
+    if (aid !== bid) return bid - aid;
+    return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+  });
+}
+
+function renderStaticBoardRows(posts, filterSlug = 'all', limit = 10) {
+  const rows = sortPostsForList(posts)
+    .filter((post) => filterSlug === 'all' || (post.board || 'free') === filterSlug)
+    .slice(0, limit);
+  if (!rows.length) return '';
+  return rows.map((post) => `        <div class="board-row">
+          <div class="board-no">${escapeHtml(post.id)}</div>
+          <a class="board-title" href="/${escapeHtml(post.path)}">${escapeHtml(post.title)}</a>
+          <div class="board-date">${displayDate(post.createdAt)}</div>
+        </div>`).join('\n');
+}
+
+function renderStaticBoardCards(posts, boards) {
+  const sorted = visibleBoards(boards);
+  return sorted.map((board) => {
+    const count = posts.filter((post) => (post.board || 'free') === board.slug).length;
+    const edit = `/admin/password.html?next=${encodeURIComponent(`/admin/board-edit.html?board=${board.slug}`)}`;
+    return `        <article class="board-card">
+          <a class="board-edit-btn" href="${escapeHtml(edit)}">수정</a>
+          <a class="board-card-main" href="/${escapeHtml(board.path)}/">
+            <strong>${escapeHtml(board.name)}</strong>
+            <span>${escapeHtml(board.description || '')}</span>
+            <em>게시글 ${count}개</em>
+          </a>
+        </article>`;
+  }).join('\n');
+}
+
 function renderListSection(posts, boards, board = null, includeCards = false) {
   const filterSlug = board ? board.slug : 'all';
   const base = board ? `/${board.path}/` : '/';
   const title = board ? board.name : '최근 게시글';
   const desc = board ? board.description : '생활 서비스 관련 글을 게시판 형식으로 확인할 수 있습니다.';
+  const staticRows = renderStaticBoardRows(posts, filterSlug, 10);
+  const staticCards = renderStaticBoardCards(posts, boards);
   const cards = includeCards ? `    <section class="board-card-section">
       <div class="board-section-head">
         <h2 class="section-title">게시판 바로가기</h2>
         <p>원하는 주제의 게시판으로 이동해서 글을 확인할 수 있습니다.</p>
       </div>
-      <div id="boardCards" class="board-card-grid"></div>
+      <div id="boardCards" class="board-card-grid">
+${staticCards}
+      </div>
     </section>
 ` : '';
   return `${cards}    <section class="card post-wrap">
@@ -774,8 +815,10 @@ function renderListSection(posts, boards, board = null, includeCards = false) {
         <input id="boardSearchInput" type="search" placeholder="검색어를 입력해주세요" autocomplete="off">
         <button class="search-btn" type="submit" aria-label="검색">검색</button>
       </form>
-      <div id="boardList" class="board-list"></div>
-      <div id="boardEmpty" class="board-empty">검색 결과가 없습니다.</div>
+      <div id="boardList" class="board-list">
+${staticRows}
+      </div>
+      <div id="boardEmpty" class="board-empty${staticRows ? '' : ' active'}">검색 결과가 없습니다.</div>
       <div id="boardPagination" class="pagination" aria-label="페이지 이동"></div>
       <script>
         window.NOTICE_POSTS = ${safeScriptJson(posts)};
@@ -786,6 +829,7 @@ function renderListSection(posts, boards, board = null, includeCards = false) {
       <script src="/assets/board.js"></script>
     </section>`;
 }
+
 
 function renderBoardIndexPage(env, posts, boards, board) {
   return layout(env, `올딜 ${board.name}`, board.description || `${board.name} 최신 글 목록입니다.`, renderListSection(posts, boards, board, false), `/${board.path}/`, {}, boards);
