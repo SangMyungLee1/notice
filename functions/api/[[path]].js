@@ -857,7 +857,7 @@ ${staticRows}
         window.NOTICE_BOARD_FILTER = ${safeScriptJson(filterSlug)};
         window.NOTICE_PAGE_BASE = ${safeScriptJson(base)};
       </script>
-      <script src="/assets/board.js"></script>
+      <script src="/assets/board.js?v=20260706-searchfix1"></script>
     </section>`;
 }
 
