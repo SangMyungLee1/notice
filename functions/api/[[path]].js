@@ -566,12 +566,9 @@ function createSeoPackage({ title, excerpt, board, id, path, createdAt, imageUrl
   const second = sentences[1] || `${boardName}에서 확인하기 좋은 핵심 내용을 함께 담았습니다.`;
   const third = sentences[2] || `${cleanTitle} 관련 정보를 찾는 분이 빠르게 이해할 수 있도록 구성했습니다.`;
   const seed = Number(id) || Date.now();
-  const pageTitle = pickVariant([
-    `${cleanTitle} | ${boardName}`,
-    `${cleanTitle} - ${boardName} 안내`,
-    `${boardName}에서 보는 ${cleanTitle}`,
-    `${cleanTitle} 정보 정리`
-  ], seed);
+  // 검색 결과 제목 후보가 불필요하게 길어지지 않도록
+  // 모든 게시글의 <title>은 게시글 제목만 사용합니다.
+  const pageTitle = cleanTitle;
   const metaDescription = composeSeoDescription([
     first,
     pickVariant([
