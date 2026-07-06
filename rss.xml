@@ -5,6 +5,13 @@
     <link>https://notice.life-helper.co.kr/</link>
     <description>생활 서비스 게시글 RSS</description>
     <item>
+      <title>이것은 테스트용 입니다</title>
+      <link>https://notice.life-helper.co.kr/ab-qna/ab-qna_v-1015.html</link>
+      <guid>https://notice.life-helper.co.kr/ab-qna/ab-qna_v-1015.html</guid>
+      <pubDate>Mon, 06 Jul 2026 06:10:35 GMT</pubDate>
+      <description>이것은 테스트용 입니다</description>
+    </item>
+    <item>
       <title>사봉낙타-재미있는 이야기의 서막</title>
       <link>https://notice.life-helper.co.kr/ab-qna/ab-qna_v-1014.html</link>
       <guid>https://notice.life-helper.co.kr/ab-qna/ab-qna_v-1014.html</guid>
