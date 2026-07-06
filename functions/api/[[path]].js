@@ -56,19 +56,27 @@ async function handleUploadImage(request, env) {
   const mm = String(now.getMonth() + 1).padStart(2, '0');
   if (file.type !== 'image/webp') return json({ ok: false, message: '이미지는 WebP로 변환된 파일만 저장할 수 있습니다.' }, 400);
   const baseName = safeFileName(file.name.replace(/\.[^.]+$/, '')) || 'image';
-  const path = `uploads/${yyyy}/${mm}/${Date.now()}-${baseName}.webp`;
-  const contentBase64 = arrayBufferToBase64(await file.arrayBuffer());
+  const arrayBuffer = await file.arrayBuffer();
+  const hash = await sha256Hex(arrayBuffer);
+  const shortHash = hash.slice(0, 24);
+  const path = `uploads/${yyyy}/${mm}/${shortHash}.webp`;
+  const contentBase64 = arrayBufferToBase64(arrayBuffer);
 
-  await commitFiles(env, `upload image ${path}`, [
-    { path, content: contentBase64, encoding: 'base64' }
-  ]);
+  const exists = await githubFileExists(env, path);
+  if (!exists) {
+    await commitFiles(env, `upload image ${path}`, [
+      { path, content: contentBase64, encoding: 'base64' }
+    ]);
+  }
 
   return json({
     ok: true,
     path,
     url: `/${path}`,
     absoluteUrl: `${trimSlash(env.SITE_URL)}/${path}`,
-    alt: file.name.replace(/\.[^.]+$/, '')
+    alt: file.name.replace(/\.[^.]+$/, ''),
+    hash: shortHash,
+    reused: exists
   });
 }
 
@@ -316,6 +324,25 @@ function arrayBufferToBase64(buffer) {
     binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
   }
   return btoa(binary);
+}
+
+async function sha256Hex(buffer) {
+  const digest = await crypto.subtle.digest('SHA-256', buffer);
+  return Array.from(new Uint8Array(digest)).map((byte) => byte.toString(16).padStart(2, '0')).join('');
+}
+
+async function githubFileExists(env, path) {
+  try {
+    await githubFetch(env, `/repos/${env.GITHUB_OWNER}/${env.GITHUB_REPO}/contents/${encodeURIComponentPath(path)}?ref=${encodeURIComponent(env.GITHUB_BRANCH)}`);
+    return true;
+  } catch (error) {
+    if (/GitHub API 오류: Not Found|GitHub API 오류: 404|Not Found/i.test(error.message || '')) return false;
+    return false;
+  }
+}
+
+function encodeURIComponentPath(path) {
+  return String(path || '').split('/').map((part) => encodeURIComponent(part)).join('/');
 }
 
 function imageExtension(name, mime) {

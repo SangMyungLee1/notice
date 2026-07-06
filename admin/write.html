@@ -81,6 +81,8 @@
     const imageInput = document.getElementById('imageInput');
     const uploadStatus = document.getElementById('uploadStatus');
     const previewList = document.getElementById('previewList');
+    const activeImageHashes = new Set();
+    const completedImageHashes = new Map();
     const saveStatus = document.getElementById('saveStatus');
     const topSaveBtn = document.getElementById('topSaveBtn');
     const submitButton = document.querySelector('#postForm button[type="submit"]');
@@ -314,6 +316,12 @@
       return new File([blob], baseName + '.webp', { type: 'image/webp' });
     }
 
+    async function fileSha256(file) {
+      const buffer = await file.arrayBuffer();
+      const digest = await crypto.subtle.digest('SHA-256', buffer);
+      return Array.from(new Uint8Array(digest)).map((byte) => byte.toString(16).padStart(2, '0')).join('');
+    }
+
     async function uploadOne(file) {
       const localPreviewUrl = URL.createObjectURL(file);
       const item = document.createElement('div');
@@ -325,15 +333,30 @@
       item.append(thumb, text);
       previewList.appendChild(item);
 
+      let webpPreviewUrl = '';
+      let imageHash = '';
       try {
         const webpFile = await convertImageToWebp(file);
         if (webpFile.size > 5 * 1024 * 1024) throw new Error('WebP 변환 후 이미지가 5MB를 넘습니다. 더 작은 이미지를 올려주세요.');
-        const webpPreviewUrl = URL.createObjectURL(webpFile);
+        imageHash = await fileSha256(webpFile);
+        if (completedImageHashes.has(imageHash)) {
+          text.textContent = '이미 업로드된 이미지라 건너뜀';
+          URL.revokeObjectURL(localPreviewUrl);
+          return true;
+        }
+        if (activeImageHashes.has(imageHash)) {
+          text.textContent = '같은 이미지 업로드 중이라 건너뜀';
+          URL.revokeObjectURL(localPreviewUrl);
+          return true;
+        }
+        activeImageHashes.add(imageHash);
+        webpPreviewUrl = URL.createObjectURL(webpFile);
         thumb.src = webpPreviewUrl;
         URL.revokeObjectURL(localPreviewUrl);
 
         const formData = new FormData();
         formData.append('image', webpFile);
+        formData.append('hash', imageHash);
         const res = await fetch('/api/upload-image', {
           method: 'POST',
           headers: { Authorization: `Bearer ${token()}` },
@@ -344,7 +367,8 @@
 
         const savedUrl = data.url || data.path || '';
         if (!savedUrl) throw new Error('업로드된 이미지 경로를 받지 못했습니다.');
-        text.textContent = 'WebP 업로드 완료';
+        completedImageHashes.set(imageHash, savedUrl);
+        text.textContent = data.reused ? '기존 WebP 이미지 사용' : 'WebP 업로드 완료';
         insertImage(savedUrl, data.alt || '', webpPreviewUrl);
         return true;
       } catch (error) {
@@ -352,7 +376,10 @@
         uploadStatus.className = 'status err';
         uploadStatus.textContent = error.message;
         URL.revokeObjectURL(localPreviewUrl);
+        if (webpPreviewUrl) URL.revokeObjectURL(webpPreviewUrl);
         return false;
+      } finally {
+        if (imageHash) activeImageHashes.delete(imageHash);
       }
     }
 
