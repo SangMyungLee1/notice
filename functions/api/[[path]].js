@@ -11,6 +11,8 @@ export async function onRequest(context) {
     if (route === 'verify' && request.method === 'GET') return await handleVerify(request, env);
     if (route === 'upload-image' && request.method === 'POST') return await handleUploadImage(request, env);
     if (route === 'create-post' && request.method === 'POST') return await handleCreatePost(request, env);
+    if (route === 'update-post' && request.method === 'POST') return await handleUpdatePost(request, env);
+    if (route === 'update-board' && request.method === 'POST') return await handleUpdateBoard(request, env);
     return json({ ok: false, message: '지원하지 않는 API 경로입니다.' }, 404);
   } catch (error) {
     return json({ ok: false, message: error.message || '서버 처리 중 오류가 발생했습니다.' }, 500);
@@ -79,24 +81,37 @@ async function handleCreatePost(request, env) {
   if (!title) return json({ ok: false, message: '제목이 비어 있습니다.' }, 400);
   if (!rawContent.trim()) return json({ ok: false, message: '내용이 비어 있습니다.' }, 400);
 
-  const contentHtml = sanitizeAdminHtml(rawContent);
+  const boards = await loadBoards(env);
+  const requestedBoard = cleanText(body.board || 'free');
+  const board = boards.find((item) => item.slug === requestedBoard) || boards.find((item) => item.slug === 'free') || defaultBoards()[0];
   const posts = await loadPosts(env);
   const nextId = Math.max(1000, ...posts.map((post) => Number(post.id) || 0)) + 1;
   const createdAt = new Date().toISOString();
-  const slug = `ab-qna_v-${nextId}.html`;
-  const path = `ab-qna/${slug}`;
+  let contentHtml = sanitizeAdminHtml(rawContent);
+  contentHtml = enrichContentImages(contentHtml, title, board, nextId);
+  const slug = `${board.prefix || board.path || 'ab-qna'}_v-${nextId}.html`;
+  const path = `${board.path || 'ab-qna'}/${slug}`;
   const excerpt = createExcerpt(contentHtml, 135);
-  const newPost = { id: nextId, title, slug, path, createdAt, excerpt, searchText: stripTags(contentHtml) };
+  const imageUrls = extractImageUrls(env, contentHtml);
+  const seo = createSeoPackage({ title, excerpt, board, id: nextId, path, createdAt, imageUrls });
+  const newPost = {
+    id: nextId,
+    title,
+    slug,
+    path,
+    board: board.slug,
+    boardName: board.name,
+    createdAt,
+    excerpt,
+    seo,
+    image: imageUrls[0] || '',
+    searchText: stripTags(contentHtml)
+  };
   const nextPosts = [newPost, ...posts].sort((a, b) => Number(b.id) - Number(a.id));
 
-  const files = [
-    { path: 'data/posts.json', content: JSON.stringify(nextPosts, null, 2), encoding: 'utf-8' },
-    { path, content: renderPostPage(env, newPost, contentHtml, nextPosts), encoding: 'utf-8' },
-    { path: 'ab-qna/index.html', content: renderListPage(env, nextPosts), encoding: 'utf-8' },
-    { path: 'index.html', content: renderHomePage(env, nextPosts), encoding: 'utf-8' },
-    { path: 'sitemap.xml', content: renderSitemap(env, nextPosts), encoding: 'utf-8' },
-    { path: 'rss.xml', content: renderRss(env, nextPosts), encoding: 'utf-8' }
-  ];
+  const files = buildSiteFiles(env, nextPosts, boards);
+  files.push({ path, content: renderPostPage(env, newPost, contentHtml, nextPosts, boards), encoding: 'utf-8' });
+  files.unshift({ path: 'data/posts.json', content: JSON.stringify(nextPosts, null, 2), encoding: 'utf-8' });
 
   await commitFiles(env, `create post ${nextId}: ${title}`, files);
 
@@ -106,11 +121,105 @@ async function handleCreatePost(request, env) {
     title,
     slug,
     path,
+    board: board.slug,
+    boardName: board.name,
+    boardPath: board.path,
     createdAt,
     excerpt,
     searchText: newPost.searchText,
     url: `${trimSlash(env.SITE_URL)}/${path}`
   });
+}
+
+async function handleUpdatePost(request, env) {
+  requireEnv(env, ['ADMIN_TOKEN_SECRET', 'GITHUB_TOKEN', 'GITHUB_OWNER', 'GITHUB_REPO', 'GITHUB_BRANCH', 'SITE_URL']);
+  await requireAuth(request, env);
+
+  const body = await safeJson(request);
+  const id = Number(body.id || 0);
+  const title = cleanText(body.title || '').slice(0, 90);
+  const rawContent = String(body.contentHtml || '');
+  if (!id) return json({ ok: false, message: '수정할 게시글 번호가 없습니다.' }, 400);
+  if (!title) return json({ ok: false, message: '제목이 비어 있습니다.' }, 400);
+  if (!rawContent.trim()) return json({ ok: false, message: '내용이 비어 있습니다.' }, 400);
+
+  const boards = await loadBoards(env);
+  const posts = await loadPosts(env);
+  const index = posts.findIndex((post) => Number(post.id) === id);
+  if (index < 0) return json({ ok: false, message: '게시글을 찾을 수 없습니다.' }, 404);
+
+  const current = posts[index];
+  const board = boardOf(boards, current.board || 'free');
+  const updatedAt = new Date().toISOString();
+  let contentHtml = sanitizeAdminHtml(rawContent);
+  contentHtml = enrichContentImages(contentHtml, title, board, id);
+  const excerpt = createExcerpt(contentHtml, 135);
+  const imageUrls = extractImageUrls(env, contentHtml);
+  const seo = createSeoPackage({
+    title,
+    excerpt,
+    board,
+    id,
+    path: current.path,
+    createdAt: current.createdAt || updatedAt,
+    imageUrls
+  });
+
+  const updatedPost = {
+    ...current,
+    title,
+    excerpt,
+    seo,
+    image: imageUrls[0] || '',
+    searchText: stripTags(contentHtml),
+    updatedAt
+  };
+  posts[index] = updatedPost;
+  const nextPosts = posts.slice().sort((a, b) => Number(b.id) - Number(a.id));
+  const files = buildSiteFiles(env, nextPosts, boards);
+  files.unshift({ path: 'data/posts.json', content: JSON.stringify(nextPosts, null, 2), encoding: 'utf-8' });
+  files.push({ path: current.path, content: renderPostPage(env, updatedPost, contentHtml, nextPosts, boards), encoding: 'utf-8' });
+
+  await commitFiles(env, `update post ${id}: ${title}`, files);
+  return json({
+    ok: true,
+    id,
+    title,
+    path: current.path,
+    board: updatedPost.board,
+    boardName: updatedPost.boardName,
+    updatedAt,
+    excerpt,
+    searchText: updatedPost.searchText,
+    url: `${trimSlash(env.SITE_URL)}/${current.path}`
+  });
+}
+
+async function handleUpdateBoard(request, env) {
+  requireEnv(env, ['ADMIN_TOKEN_SECRET', 'GITHUB_TOKEN', 'GITHUB_OWNER', 'GITHUB_REPO', 'GITHUB_BRANCH', 'SITE_URL']);
+  await requireAuth(request, env);
+  const body = await safeJson(request);
+  const slug = cleanText(body.slug || '');
+  const boards = await loadBoards(env);
+  const index = boards.findIndex((item) => item.slug === slug);
+  if (index < 0) return json({ ok: false, message: '게시판을 찾을 수 없습니다.' }, 404);
+  const current = boards[index];
+  const name = cleanText(body.name || '').slice(0, 40);
+  if (!name) return json({ ok: false, message: '게시판 이름을 입력하세요.' }, 400);
+  boards[index] = {
+    ...current,
+    name,
+    description: cleanText(body.description || '').slice(0, 160),
+    order: Math.max(1, Math.min(99, Number(body.order || current.order || 1))),
+    visible: body.visible !== false
+  };
+  const posts = await loadPosts(env);
+  const files = [
+    { path: 'data/boards.json', content: JSON.stringify(boards, null, 2), encoding: 'utf-8' },
+    ...buildSiteFiles(env, posts, boards)
+  ];
+  await commitFiles(env, `update board ${slug}: ${name}`, files);
+  return json({ ok: true, board: boards[index] });
 }
 
 async function safeJson(request) {
@@ -255,6 +364,48 @@ async function loadPosts(env) {
   }
 }
 
+
+async function loadBoards(env) {
+  try {
+    const data = await githubFetch(env, `/repos/${env.GITHUB_OWNER}/${env.GITHUB_REPO}/contents/data/boards.json?ref=${encodeURIComponent(env.GITHUB_BRANCH)}`);
+    const jsonText = decodeBase64Content(data.content || '');
+    const boards = JSON.parse(jsonText);
+    return Array.isArray(boards) && boards.length ? normalizeBoards(boards) : defaultBoards();
+  } catch (_) {
+    return defaultBoards();
+  }
+}
+
+function defaultBoards() {
+  return [
+    { slug: 'free', name: '자유게시판', path: 'ab-qna', prefix: 'ab-qna', description: '생활 서비스와 자유로운 정보를 함께 모아두는 기본 게시판입니다.', order: 1, visible: true },
+    { slug: 'moving', name: '포장이사 게시판', path: 'moving', prefix: 'moving', description: '포장이사 비용, 업체 비교, 견적 확인 방법을 정리하는 게시판입니다.', order: 2, visible: true },
+    { slug: 'internet', name: '인터넷가입 게시판', path: 'internet', prefix: 'internet', description: '인터넷가입, 인터넷설치, 인터넷변경 조건과 혜택을 다루는 게시판입니다.', order: 3, visible: true },
+    { slug: 'water', name: '정수기렌탈 게시판', path: 'water', prefix: 'water', description: '정수기렌탈 제품, 비용, 관리 조건을 비교해보는 게시판입니다.', order: 4, visible: true },
+    { slug: 'rentcar', name: '렌트카 게시판', path: 'rentcar', prefix: 'rentcar', description: '장기렌트카와 차량 이용 조건을 살펴보는 게시판입니다.', order: 5, visible: true }
+  ];
+}
+
+function normalizeBoards(boards) {
+  const fallback = defaultBoards();
+  const clean = boards.map((board, index) => ({
+    slug: safeBoardSlug(board.slug || fallback[index]?.slug || 'free'),
+    name: cleanText(board.name || fallback[index]?.name || '게시판').slice(0, 40),
+    path: safeBoardPath(board.path || fallback[index]?.path || 'ab-qna'),
+    prefix: safeBoardPath(board.prefix || board.path || fallback[index]?.prefix || 'ab-qna'),
+    description: cleanText(board.description || '').slice(0, 160),
+    order: Math.max(1, Math.min(99, Number(board.order || index + 1))),
+    visible: board.visible !== false
+  })).filter((board) => board.slug && board.path);
+  return clean.length ? clean : fallback;
+}
+function safeBoardSlug(value) {
+  return String(value || '').toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 40) || 'free';
+}
+function safeBoardPath(value) {
+  return String(value || '').toLowerCase().replace(/[^a-z0-9_-]/g, '').replace(/^\/+|\/+$/g, '').slice(0, 40) || 'ab-qna';
+}
+
 function decodeBase64Content(value) {
   return base64ToUtf8(String(value).replace(/\s/g, ''));
 }
@@ -360,24 +511,161 @@ function extractFirstImageUrl(env, html) {
   return match ? absoluteUrl(env, match[1]) : '';
 }
 
-function createArticleJsonLd(env, post) {
-  const url = `${trimSlash(env.SITE_URL)}/${post.path}`;
+function extractImageUrls(env, html) {
+  const urls = [];
+  String(html || '').replace(/<img[^>]+src=["']([^"']+)["'][^>]*>/gi, (_, src) => {
+    const url = absoluteUrl(env, src);
+    if (url && !urls.includes(url)) urls.push(url);
+    return _;
+  });
+  return urls;
+}
+
+function normalizeForSeoText(value, max = 160) {
+  const text = cleanText(stripTags(value));
+  if (!text) return '';
+  return text.length > max ? `${text.slice(0, max - 1)}…` : text;
+}
+
+function pickVariant(list, seed) {
+  return list[Math.abs(Number(seed) || 0) % list.length];
+}
+
+function clipSentence(value, max) {
+  const text = cleanText(value);
+  return text.length > max ? `${text.slice(0, max - 1)}…` : text;
+}
+
+function createSeoPackage({ title, excerpt, board, id, path, createdAt, imageUrls }) {
+  const boardName = board?.name || '생활게시판';
+  const base = normalizeForSeoText(excerpt, 110) || `${title} 관련 내용을 ${boardName}에서 확인할 수 있습니다.`;
+  const seed = Number(id) || Date.now();
+  const pageTitle = pickVariant([
+    `${title} | ${boardName}`,
+    `${title} - ${boardName} 안내`,
+    `${boardName}에서 보는 ${title}`
+  ], seed);
+  const metaDescription = clipSentence(pickVariant([
+    `${base} 핵심 내용을 부담 없이 읽을 수 있도록 정리했습니다.`,
+    `${title}에 대해 궁금한 부분을 빠르게 훑어볼 수 있게 구성한 글입니다.`,
+    `${boardName} 주제에 맞춰 ${title} 내용을 자연스럽게 풀어낸 게시글입니다.`
+  ], seed + 1), 155);
+  const ogDescription = clipSentence(pickVariant([
+    `${title} 관련 내용을 이야기 흐름으로 정리했습니다. 필요한 정보만 가볍게 확인해보세요.`,
+    `${boardName}에서 다루는 ${title} 글입니다. 검색자가 궁금해할 만한 포인트를 중심으로 담았습니다.`,
+    `${base} 읽기 편한 문장으로 구성해 처음 보는 분도 쉽게 따라갈 수 있습니다.`
+  ], seed + 2), 165);
+  const twitterDescription = clipSentence(pickVariant([
+    `${title} 요점을 짧게 확인하고 이어서 본문에서 자세한 내용을 볼 수 있습니다.`,
+    `${boardName} 최신 글로 등록된 ${title} 안내입니다.`,
+    `${base} 모바일에서도 읽기 좋게 정리했습니다.`
+  ], seed + 3), 150);
+  const jsonLdDescription = clipSentence(pickVariant([
+    `${title} 게시글은 ${boardName} 성격에 맞춰 주제 설명과 읽을거리를 함께 제공하는 문서입니다.`,
+    `${boardName}에 등록된 ${title} 콘텐츠로, 본문과 이미지 정보를 포함해 구성된 글입니다.`,
+    `${title}에 대한 본문 내용을 바탕으로 작성일, 게시판, 이미지 정보를 함께 제공하는 Article 문서입니다.`
+  ], seed + 4), 170);
+  const keywordSet = Array.from(new Set([
+    title,
+    boardName.replace(/ 게시판$/, ''),
+    boardName,
+    ...String(title).split(/[\s,·|/]+/).filter((word) => word.length > 1).slice(0, 5)
+  ])).slice(0, 8);
   return {
+    pageTitle,
+    metaDescription,
+    ogTitle: pickVariant([title, `${title} 안내`, `${boardName} ${title}`], seed + 5),
+    ogDescription,
+    twitterTitle: pickVariant([title, `${title} 요약`, `${boardName} 글 보기`], seed + 6),
+    twitterDescription,
+    jsonLdDescription,
+    keywords: keywordSet.join(', '),
+    image: imageUrls?.[0] || '',
+    images: imageUrls || [],
+    sourcePath: path,
+    generatedAt: createdAt
+  };
+}
+
+function enrichContentImages(html, title, board, postId) {
+  let index = 0;
+  const boardName = board?.name || '생활게시판';
+  const cleanTitle = cleanText(title);
+  return String(html || '').replace(/<figure([^>]*)>([\s\S]*?<img[^>]*>[\s\S]*?)<\/figure>/gi, (match, figureAttrs, inner) => {
+    index += 1;
+    const imageAlt = `${cleanTitle} ${boardName} 참고 이미지 ${index}`;
+    let nextInner = inner.replace(/<img([^>]*)>/i, (imgMatch, attrs) => {
+      let nextAttrs = attrs;
+      if (/\salt=/i.test(nextAttrs)) {
+        nextAttrs = nextAttrs.replace(/\salt=("[^"]*"|'[^']*'|[^\s>]+)/i, ` alt="${escapeAttr(imageAlt)}"`);
+      } else {
+        nextAttrs += ` alt="${escapeAttr(imageAlt)}"`;
+      }
+      if (!/\stitle=/i.test(nextAttrs)) nextAttrs += ` title="${escapeAttr(cleanTitle)} 이미지 ${index}"`;
+      if (!/\sloading=/i.test(nextAttrs)) nextAttrs += ' loading="lazy"';
+      if (!/\sdecoding=/i.test(nextAttrs)) nextAttrs += ' decoding="async"';
+      if (!/\sdata-seo-image=/i.test(nextAttrs)) nextAttrs += ` data-seo-image="${postId}-${index}"`;
+      return `<img${nextAttrs}>`;
+    });
+    if (!/<figcaption[\s>]/i.test(nextInner)) {
+      nextInner += `<figcaption>${escapeHtml(`${cleanTitle} 관련 ${boardName} 자료 이미지 ${index}`)}</figcaption>`;
+    }
+    return `<figure${figureAttrs}>${nextInner}</figure>`;
+  }).replace(/<img([^>]*)>/gi, (match, attrs) => {
+    if (/data-seo-image=/i.test(attrs)) return match;
+    index += 1;
+    const imageAlt = `${cleanTitle} ${boardName} 본문 이미지 ${index}`;
+    let nextAttrs = attrs;
+    if (/\salt=/i.test(nextAttrs)) {
+      nextAttrs = nextAttrs.replace(/\salt=("[^"]*"|'[^']*'|[^\s>]+)/i, ` alt="${escapeAttr(imageAlt)}"`);
+    } else {
+      nextAttrs += ` alt="${escapeAttr(imageAlt)}"`;
+    }
+    if (!/\stitle=/i.test(nextAttrs)) nextAttrs += ` title="${escapeAttr(cleanTitle)} 본문 이미지 ${index}"`;
+    if (!/\sloading=/i.test(nextAttrs)) nextAttrs += ' loading="lazy"';
+    if (!/\sdecoding=/i.test(nextAttrs)) nextAttrs += ' decoding="async"';
+    if (!/\sdata-seo-image=/i.test(nextAttrs)) nextAttrs += ` data-seo-image="${postId}-${index}"`;
+    return `<img${nextAttrs}>`;
+  });
+}
+
+function escapeAttr(value) {
+  return escapeHtml(value).replace(/`/g, '&#96;');
+}
+
+function createArticleJsonLd(env, post, board = null) {
+  const url = `${trimSlash(env.SITE_URL)}/${post.path}`;
+  const seo = post.seo || {};
+  const data = {
     '@context': 'https://schema.org',
     '@type': 'Article',
     headline: post.title,
-    description: post.excerpt || '',
+    description: seo.jsonLdDescription || post.excerpt || '',
     datePublished: post.createdAt || '',
     dateModified: post.updatedAt || post.createdAt || '',
     mainEntityOfPage: { '@type': 'WebPage', '@id': url },
     url,
+    articleSection: board?.name || post.boardName || '생활게시판',
+    keywords: seo.keywords || '',
     author: { '@type': 'Organization', name: '올딜 생활게시판' },
     publisher: { '@type': 'Organization', name: '올딜 생활게시판' }
   };
+  const images = seo.images && seo.images.length ? seo.images : (seo.image ? [seo.image] : []);
+  if (images.length) data.image = images;
+  return data;
+}
+
+function boardOf(boards, slug) {
+  return boards.find((board) => board.slug === slug) || boards.find((board) => board.slug === 'free') || defaultBoards()[0];
+}
+
+function visibleBoards(boards) {
+  return boards.slice().filter((board) => board.visible !== false).sort((a, b) => Number(a.order || 0) - Number(b.order || 0));
 }
 
 function renderArticleNav(posts, currentPost) {
-  const sorted = posts.slice().sort((a, b) => Number(a.id) - Number(b.id));
+  const sameBoard = posts.filter((post) => (post.board || 'free') === (currentPost.board || 'free'));
+  const sorted = sameBoard.slice().sort((a, b) => Number(a.id) - Number(b.id));
   const index = sorted.findIndex((post) => Number(post.id) === Number(currentPost.id));
   const prev = index > 0 ? sorted[index - 1] : null;
   const next = index >= 0 && index < sorted.length - 1 ? sorted[index + 1] : null;
@@ -390,34 +678,44 @@ function renderArticleNav(posts, currentPost) {
       </nav>`;
 }
 
-function layout(env, title, description, body, canonicalPath = '/', options = {}) {
+function layout(env, title, description, body, canonicalPath = '/', options = {}, boards = defaultBoards()) {
   const site = trimSlash(env.SITE_URL);
   const canonicalUrl = site + canonicalPath;
   const ogType = options.ogType || 'website';
+  const metaDescription = options.metaDescription || description;
+  const ogTitle = options.ogTitle || title;
+  const ogDescription = options.ogDescription || description;
+  const twitterTitle = options.twitterTitle || title;
+  const twitterDescription = options.twitterDescription || metaDescription;
+  const keywords = options.keywords ? `
+  <meta name="keywords" content="${escapeHtml(options.keywords)}">` : '';
   const ogImage = options.ogImage ? `
   <meta property="og:image" content="${escapeHtml(options.ogImage)}">
-  <meta name="twitter:image" content="${escapeHtml(options.ogImage)}">` : '';
+  <meta property="og:image:alt" content="${escapeHtml(options.ogImageAlt || ogTitle)}">
+  <meta name="twitter:image" content="${escapeHtml(options.ogImage)}">
+  <meta name="twitter:image:alt" content="${escapeHtml(options.ogImageAlt || twitterTitle)}">` : '';
   const articleMeta = options.publishedTime ? `
   <meta property="article:published_time" content="${escapeHtml(options.publishedTime)}">
   <meta property="article:modified_time" content="${escapeHtml(options.modifiedTime || options.publishedTime)}">` : '';
   const jsonLd = options.jsonLd ? `
   <script type="application/ld+json">${safeScriptJson(options.jsonLd)}</script>` : '';
+  const nav = visibleBoards(boards).map((board) => `<a href="/${escapeHtml(board.path)}/">${escapeHtml(board.name)}</a>`).join('\n        ');
   return `<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${escapeHtml(title)}</title>
-  <meta name="description" content="${escapeHtml(description)}">
+  <meta name="description" content="${escapeHtml(metaDescription)}">${keywords}
   <meta property="og:locale" content="ko_KR">
   <meta property="og:site_name" content="올딜 생활게시판">
-  <meta property="og:title" content="${escapeHtml(title)}">
-  <meta property="og:description" content="${escapeHtml(description)}">
+  <meta property="og:title" content="${escapeHtml(ogTitle)}">
+  <meta property="og:description" content="${escapeHtml(ogDescription)}">
   <meta property="og:url" content="${escapeHtml(canonicalUrl)}">
   <meta property="og:type" content="${escapeHtml(ogType)}">${ogImage}${articleMeta}
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="${escapeHtml(title)}">
-  <meta name="twitter:description" content="${escapeHtml(description)}">
+  <meta name="twitter:title" content="${escapeHtml(twitterTitle)}">
+  <meta name="twitter:description" content="${escapeHtml(twitterDescription)}">
   <link rel="canonical" href="${escapeHtml(canonicalUrl)}">
   <link rel="stylesheet" href="/assets/style.css">${jsonLd}
 </head>
@@ -426,10 +724,10 @@ function layout(env, title, description, body, canonicalPath = '/', options = {}
     <div class="header-inner">
       <a class="logo" href="/"><span class="logo-badge">올</span><span>올딜 생활게시판</span></a>
       <h1 class="hero-title">생활 서비스 문의와 안내를 모아둔 게시판</h1>
-      <p class="hero-desc">포장이사, 인터넷가입, 이사청소처럼 비교가 필요한 생활 정보를 게시판 형식으로 정리합니다.</p>
+      <p class="hero-desc">포장이사, 인터넷가입, 정수기렌탈, 렌트카처럼 비교가 필요한 생활 정보를 게시판별로 정리합니다.</p>
       <nav class="nav">
         <a href="/">홈</a>
-        <a href="/ab-qna/">게시판</a>
+        ${nav}
         <a href="/admin/password.html">글쓰기</a>
       </nav>
     </div>
@@ -442,14 +740,6 @@ ${body}
 </html>`;
 }
 
-function renderRows(posts) {
-  return posts.map((post) => `      <div class="board-row">
-        <div class="board-no">${post.id}</div>
-        <a class="board-title" href="/${post.path}">${escapeHtml(post.title)}</a>
-        <div class="board-date">${displayDate(post.createdAt)}</div>
-      </div>`).join('\n');
-}
-
 function safeScriptJson(value) {
   return JSON.stringify(value)
     .replace(/</g, '\\u003c')
@@ -459,214 +749,110 @@ function safeScriptJson(value) {
     .replace(/\u2029/g, '\\u2029');
 }
 
-function renderBoardScript(posts) {
-  return `<script>
-(function(){
-  var posts = ${safeScriptJson(posts)};
-
-  function mergePendingPosts(basePosts) {
-    var base = Array.isArray(basePosts) ? basePosts.slice() : [];
-    var originalKeys = {};
-    base.forEach(function(post) {
-      originalKeys[String(post.id || post.path)] = true;
-    });
-    var pending = [];
-    try {
-      pending = JSON.parse(localStorage.getItem('notice_pending_posts') || '[]');
-      if (!Array.isArray(pending)) pending = [];
-    } catch (_) { pending = []; }
-    var now = Date.now();
-    var stillPending = [];
-    pending.forEach(function(post) {
-      if (!post || !post.path) return;
-      var key = String(post.id || post.path);
-      var savedAt = Number(post.savedAtMs || 0);
-      var expired = savedAt && (now - savedAt > 24 * 60 * 60 * 1000);
-      if (expired) return;
-      if (originalKeys[key]) return;
-      originalKeys[key] = true;
-      stillPending.push(post);
-      base.unshift(post);
-    });
-    try {
-      if (stillPending.length) localStorage.setItem('notice_pending_posts', JSON.stringify(stillPending.slice(0, 20)));
-      else localStorage.removeItem('notice_pending_posts');
-    } catch (_) {}
-    return base.sort(function(a, b) {
-      var aid = Number(a.id) || 0;
-      var bid = Number(b.id) || 0;
-      if (aid !== bid) return bid - aid;
-      return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
-    });
-  }
-  posts = mergePendingPosts(posts);
-  var perPage = 10;
-  var currentPage = 1;
-  var currentQuery = '';
-  var list = document.getElementById('boardList');
-  var pagination = document.getElementById('boardPagination');
-  var empty = document.getElementById('boardEmpty');
-  var form = document.getElementById('boardSearchForm');
-  var input = document.getElementById('boardSearchInput');
-
-  function escapeHtml(value) {
-    return String(value == null ? '' : value).replace(/[&<>\"']/g, function(ch) {
-      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch] || ch;
-    });
-  }
-  function displayDate(value) {
-    var d = new Date(value);
-    if (isNaN(d.getTime())) return String(value || '').slice(0, 10);
-    var y = d.getFullYear();
-    var m = String(d.getMonth() + 1).padStart(2, '0');
-    var day = String(d.getDate()).padStart(2, '0');
-    return y + '.' + m + '.' + day;
-  }
-  function normalize(value) {
-    return String(value || '').toLowerCase().replace(/\\s+/g, ' ').trim();
-  }
-  function filteredPosts() {
-    var q = normalize(currentQuery);
-    if (!q) return posts.slice();
-    return posts.filter(function(post) {
-      var target = normalize([post.id, post.title, post.excerpt, post.searchText].join(' '));
-      return target.indexOf(q) !== -1;
-    });
-  }
-  function renderRows(rows) {
-    if (!rows.length) {
-      list.innerHTML = '';
-      empty.classList.add('active');
-      return;
-    }
-    empty.classList.remove('active');
-    list.innerHTML = rows.map(function(post) {
-      return '<div class="board-row">' +
-        '<div class="board-no">' + escapeHtml(post.id) + '</div>' +
-        '<a class="board-title" href="/' + escapeHtml(post.path) + '">' + escapeHtml(post.title) + '</a>' +
-        '<div class="board-date">' + displayDate(post.createdAt) + '</div>' +
-      '</div>';
-    }).join('');
-  }
-  function pageButton(label, page, active, disabled) {
-    var btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'page-btn' + (active ? ' active' : '');
-    btn.textContent = label;
-    btn.disabled = !!disabled;
-    if (!disabled) btn.addEventListener('click', function(){ currentPage = page; render(true); });
-    return btn;
-  }
-  function renderPagination(totalPages) {
-    pagination.innerHTML = '';
-    if (totalPages <= 1) return;
-    var blockStart = Math.floor((currentPage - 1) / 10) * 10 + 1;
-    var blockEnd = Math.min(blockStart + 9, totalPages);
-    pagination.appendChild(pageButton('‹', Math.max(1, blockStart - 10), false, blockStart === 1));
-    for (var i = blockStart; i <= blockEnd; i++) {
-      pagination.appendChild(pageButton(String(i), i, i === currentPage, false));
-    }
-    pagination.appendChild(pageButton('›', Math.min(totalPages, blockStart + 10), false, blockEnd >= totalPages));
-  }
-  function updateUrl() {
-    var params = new URLSearchParams();
-    if (currentQuery) params.set('q', currentQuery);
-    if (currentPage > 1) params.set('page', String(currentPage));
-    var qs = params.toString();
-    history.replaceState({ q: currentQuery, page: currentPage }, '', qs ? '/ab-qna/?' + qs : '/ab-qna/');
-  }
-  function render(syncUrl) {
-    var filtered = filteredPosts();
-    var totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
-    currentPage = Math.max(1, Math.min(currentPage, totalPages));
-    var start = (currentPage - 1) * perPage;
-    renderRows(filtered.slice(start, start + perPage));
-    renderPagination(totalPages);
-    if (syncUrl) updateUrl();
-  }
-  function loadFromUrl() {
-    var params = new URLSearchParams(location.search);
-    currentQuery = params.get('q') || '';
-    currentPage = Math.max(1, parseInt(params.get('page') || '1', 10) || 1);
-    input.value = currentQuery;
-    render(false);
-  }
-  form.addEventListener('submit', function(event) {
-    event.preventDefault();
-    currentQuery = input.value.trim();
-    currentPage = 1;
-    render(true);
-  });
-  window.addEventListener('popstate', loadFromUrl);
-  loadFromUrl();
-})();
-<\/script>`;
-}
-
-function renderListPage(env, posts) {
-  const body = `    <section class="card post-wrap">
+function renderListSection(posts, boards, board = null, includeCards = false) {
+  const filterSlug = board ? board.slug : 'all';
+  const base = board ? `/${board.path}/` : '/';
+  const title = board ? board.name : '최근 게시글';
+  const desc = board ? board.description : '생활 서비스 관련 글을 게시판 형식으로 확인할 수 있습니다.';
+  const cards = includeCards ? `    <section class="board-card-section">
+      <div class="board-section-head">
+        <h2 class="section-title">게시판 바로가기</h2>
+        <p>원하는 주제의 게시판으로 이동해서 글을 확인할 수 있습니다.</p>
+      </div>
+      <div id="boardCards" class="board-card-grid"></div>
+    </section>
+` : '';
+  return `${cards}    <section class="card post-wrap">
       <div class="board-toolbar">
         <div>
-          <h2 class="section-title">최근 게시글</h2>
-          <p style="margin:0;color:var(--muted)">새 글은 관리자 비밀번호 확인 후 작성할 수 있습니다.</p>
+          <h2 class="section-title">${escapeHtml(title)}</h2>
+          <p style="margin:0;color:var(--muted)">${escapeHtml(desc)}</p>
         </div>
-        <a class="btn btn-primary" href="/admin/password.html">글쓰기</a>
+        <a class="btn btn-primary" href="/admin/password.html${board ? `?next=${encodeURIComponent(`/admin/write.html?board=${board.slug}`)}` : ''}">글쓰기</a>
       </div>
       <form id="boardSearchForm" class="board-search" role="search">
         <input id="boardSearchInput" type="search" placeholder="검색어를 입력해주세요" autocomplete="off">
         <button class="search-btn" type="submit" aria-label="검색">검색</button>
       </form>
-      <div id="boardList" class="board-list">
-${renderRows(posts.slice(0, 10))}
-      </div>
+      <div id="boardList" class="board-list"></div>
       <div id="boardEmpty" class="board-empty">검색 결과가 없습니다.</div>
       <div id="boardPagination" class="pagination" aria-label="페이지 이동"></div>
-${renderBoardScript(posts)}
+      <script>
+        window.NOTICE_POSTS = ${safeScriptJson(posts)};
+        window.NOTICE_BOARDS = ${safeScriptJson(boards)};
+        window.NOTICE_BOARD_FILTER = ${safeScriptJson(filterSlug)};
+        window.NOTICE_PAGE_BASE = ${safeScriptJson(base)};
+      </script>
+      <script src="/assets/board.js"></script>
     </section>`;
-  return layout(env, '올딜 생활게시판 목록', '올딜 생활게시판의 최신 게시글 목록입니다.', body, '/ab-qna/');
 }
 
-function renderHomePage(env, posts) {
-  const body = `    <section class="card post-wrap">
-      <div class="board-toolbar">
-        <div>
-          <h2 class="section-title">최근 게시글</h2>
-          <p style="margin:0;color:var(--muted)">생활 서비스 관련 글을 게시판 형식으로 확인할 수 있습니다.</p>
-        </div>
-        <a class="btn btn-primary" href="/admin/password.html">글쓰기</a>
-      </div>
-      <div class="board-list">
-${renderRows(posts.slice(0, 20))}
-      </div>
-    </section>`;
-  return layout(env, '올딜 생활게시판', '생활 서비스 문의와 안내를 모아둔 올딜 생활게시판입니다.', body, '/');
+function renderBoardIndexPage(env, posts, boards, board) {
+  return layout(env, `올딜 ${board.name}`, board.description || `${board.name} 최신 글 목록입니다.`, renderListSection(posts, boards, board, false), `/${board.path}/`, {}, boards);
 }
 
-function renderPostPage(env, post, contentHtml, posts = []) {
+function renderHomePage(env, posts, boards = defaultBoards()) {
+  return layout(env, '올딜 생활게시판', '생활 서비스 문의와 안내를 게시판별로 나누어 확인할 수 있는 올딜 생활게시판입니다.', renderListSection(posts, boards, null, true), '/', {}, boards);
+}
+
+function renderPostPage(env, post, contentHtml, posts = [], boards = defaultBoards()) {
+  const board = boardOf(boards, post.board || 'free');
+  const editHref = `/admin/password.html?next=${encodeURIComponent(`/admin/edit-post.html?id=${post.id}`)}`;
   const body = `    <article class="card post-wrap">
+      <div class="post-action-bar">
+        <p class="post-board-label"><a href="/${escapeHtml(board.path)}/">${escapeHtml(board.name)}</a></p>
+        <a class="btn btn-light post-edit-btn" href="${escapeHtml(editHref)}">수정</a>
+      </div>
       <h1 class="post-title">${escapeHtml(post.title)}</h1>
-      <div class="post-meta">작성자 관리자 · <time datetime="${escapeHtml(post.createdAt)}">작성일 ${displayDate(post.createdAt)}</time></div>
+      <div class="post-meta">작성자 관리자 · <time datetime="${escapeHtml(post.createdAt)}">작성일 ${displayDate(post.createdAt)}</time>${post.updatedAt ? ` · 수정일 ${displayDate(post.updatedAt)}` : ''}</div>
       <div class="post-content">
 ${contentHtml}
       </div>
 ${renderArticleNav(posts, post)}
-      <p style="margin-top:28px"><a class="btn btn-light" href="/ab-qna/">목록으로</a></p>
+      <p style="margin-top:28px"><a class="btn btn-light" href="/${escapeHtml(board.path)}/">목록으로</a></p>
     </article>`;
-  return layout(env, post.title, post.excerpt, body, `/${post.path}`, {
+  const seo = post.seo || createSeoPackage({
+    title: post.title,
+    excerpt: post.excerpt,
+    board,
+    id: post.id,
+    path: post.path,
+    createdAt: post.createdAt,
+    imageUrls: extractImageUrls(env, contentHtml)
+  });
+  return layout(env, seo.pageTitle || post.title, seo.metaDescription || post.excerpt, body, `/${post.path}`, {
     ogType: 'article',
-    ogImage: extractFirstImageUrl(env, contentHtml),
+    metaDescription: seo.metaDescription,
+    ogTitle: seo.ogTitle,
+    ogDescription: seo.ogDescription,
+    twitterTitle: seo.twitterTitle,
+    twitterDescription: seo.twitterDescription,
+    keywords: seo.keywords,
+    ogImage: seo.image || extractFirstImageUrl(env, contentHtml),
+    ogImageAlt: `${post.title} 대표 이미지`,
     publishedTime: post.createdAt,
     modifiedTime: post.updatedAt || post.createdAt,
-    jsonLd: createArticleJsonLd(env, post)
-  });
+    jsonLd: createArticleJsonLd(env, { ...post, seo }, board)
+  }, boards);
 }
 
-function renderSitemap(env, posts) {
-  const site = trimSlash(env.SITE_URL);
-  const base = [
-    { loc: `${site}/`, changefreq: 'daily', priority: '0.8', lastmod: new Date().toISOString().slice(0, 10) },
-    { loc: `${site}/ab-qna/`, changefreq: 'hourly', priority: '0.9', lastmod: new Date().toISOString().slice(0, 10) }
+function buildSiteFiles(env, posts, boards) {
+  const files = [
+    { path: 'index.html', content: renderHomePage(env, posts, boards), encoding: 'utf-8' },
+    { path: 'sitemap.xml', content: renderSitemap(env, posts, boards), encoding: 'utf-8' },
+    { path: 'rss.xml', content: renderRss(env, posts), encoding: 'utf-8' }
   ];
+  for (const board of boards) {
+    files.push({ path: `${board.path}/index.html`, content: renderBoardIndexPage(env, posts, boards, board), encoding: 'utf-8' });
+  }
+  return files;
+}
+
+function renderSitemap(env, posts, boards = defaultBoards()) {
+  const site = trimSlash(env.SITE_URL);
+  const today = new Date().toISOString().slice(0, 10);
+  const base = [{ loc: `${site}/`, changefreq: 'daily', priority: '0.8', lastmod: today }]
+    .concat(visibleBoards(boards).map((board) => ({ loc: `${site}/${board.path}/`, changefreq: 'hourly', priority: '0.9', lastmod: today })));
   const urls = base.concat(posts.map((post) => ({ loc: `${site}/${post.path}`, changefreq: 'weekly', priority: '0.7', lastmod: String(post.updatedAt || post.createdAt || '').slice(0, 10) })));
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -692,7 +878,7 @@ function renderRss(env, posts) {
 <rss version="2.0">
   <channel>
     <title>올딜 생활게시판</title>
-    <link>${site}/ab-qna/</link>
+    <link>${site}/</link>
     <description>생활 서비스 게시글 RSS</description>
 ${items}
   </channel>
