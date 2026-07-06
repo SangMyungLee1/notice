@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
   <title>게시글 수정</title>
-  <link rel="stylesheet" href="/assets/style.css?v=20260706-navstrong2">
+  <link rel="stylesheet" href="/assets/style.css?v=20260707-htmlmode1">
 </head>
 <body>
   <main class="admin-wrap">
@@ -31,6 +31,7 @@
         <div class="form-row">
           <label class="label" for="editor">내용</label>
           <div class="editor-toolbar">
+            <button class="btn btn-html" type="button" id="toggleHtmlBtn" aria-pressed="false">HTML</button>
             <button class="btn btn-light" type="button" id="addLinkBtn">URL</button>
             <button class="btn btn-light" type="button" data-command="bold">굵게</button>
             <button class="btn btn-light" type="button" data-command="insertUnorderedList">목록</button>
@@ -38,6 +39,7 @@
             <button class="btn btn-primary" type="button" id="topSaveBtn">수정 저장</button>
           </div>
           <div id="editor" class="editor" contenteditable="true" data-placeholder="내용을 불러오는 중입니다."></div>
+          <textarea id="htmlSource" class="html-source" hidden spellcheck="false" placeholder="본문 영역에 들어갈 HTML만 입력하세요. 예: &lt;h2&gt;소제목&lt;/h2&gt;, &lt;p&gt;문단&lt;/p&gt;, &lt;figure&gt;...&lt;/figure&gt;"></textarea>
         </div>
 
         <button class="btn btn-primary" type="submit">수정 저장</button>
@@ -69,6 +71,8 @@
     const params = new URLSearchParams(location.search);
     const postId = Number(params.get('id') || 0);
     const editor = document.getElementById('editor');
+    const htmlSource = document.getElementById('htmlSource');
+    const toggleHtmlBtn = document.getElementById('toggleHtmlBtn');
     const imageModal = document.getElementById('imageModal');
     const openImageModal = document.getElementById('openImageModal');
     const closeImageModal = document.getElementById('closeImageModal');
@@ -84,6 +88,7 @@
     const saveButtons = [submitButton, topSaveBtn].filter(Boolean);
     let selectedImage = null;
     let savedRange = null;
+    let isHtmlMode = false;
     let currentPost = null;
 
     function lockEditorScrollBox() {
@@ -148,7 +153,90 @@
 
     verifySession().then(loadPost).catch((error) => setSaveStatus(error.message, 'err'));
 
+
+    function clientSanitizeHtml(html) {
+      const wrap = document.createElement('div');
+      let raw = String(html || '');
+      const bodyMatch = raw.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+      if (bodyMatch) raw = bodyMatch[1];
+      raw = raw
+        .replace(/<!doctype[^>]*>/gi, '')
+        .replace(/<head[\s\S]*?<\/head>/gi, '')
+        .replace(/<script[\s\S]*?<\/script>/gi, '')
+        .replace(/<style[\s\S]*?<\/style>/gi, '')
+        .replace(/<iframe[\s\S]*?<\/iframe>/gi, '')
+        .replace(/<object[\s\S]*?<\/object>/gi, '')
+        .replace(/<embed[\s\S]*?>/gi, '')
+        .replace(/<meta[\s\S]*?>/gi, '')
+        .replace(/<title[\s\S]*?<\/title>/gi, '')
+        .replace(/<link[\s\S]*?>/gi, '')
+        .replace(/<base[\s\S]*?>/gi, '')
+        .replace(/<\/?(?:html|body)[^>]*>/gi, '');
+      wrap.innerHTML = raw;
+      wrap.querySelectorAll('script,style,iframe,object,embed,form,input,textarea,button,select,option,meta,title,link,base').forEach((node) => node.remove());
+      wrap.querySelectorAll('*').forEach((node) => {
+        Array.from(node.attributes).forEach((attr) => {
+          const name = attr.name.toLowerCase();
+          const value = String(attr.value || '');
+          if (name.startsWith('on') || name === 'srcdoc') node.removeAttribute(attr.name);
+          if ((name === 'href' || name === 'src') && /^\s*javascript:/i.test(value)) node.removeAttribute(attr.name);
+        });
+      });
+      return wrap.innerHTML.trim();
+    }
+
+    function insertAtTextareaCursor(textarea, text) {
+      textarea.focus();
+      const start = textarea.selectionStart || 0;
+      const end = textarea.selectionEnd || 0;
+      textarea.value = textarea.value.slice(0, start) + text + textarea.value.slice(end);
+      const nextPos = start + text.length;
+      textarea.setSelectionRange(nextPos, nextPos);
+    }
+
+    function plainTextFromHtml(html) {
+      const wrap = document.createElement('div');
+      wrap.innerHTML = clientSanitizeHtml(html);
+      return (wrap.textContent || '').replace(/\s+/g, ' ').trim();
+    }
+
+    function syncHtmlFromEditor() {
+      htmlSource.value = getContentHtmlForSave();
+    }
+
+    function applyHtmlToEditor() {
+      editor.innerHTML = clientSanitizeHtml(htmlSource.value);
+      normalizeEditorLinks();
+      editor.setAttribute('data-placeholder', '내용을 입력하세요.');
+    }
+
+    function setHtmlMode(next) {
+      if (next === isHtmlMode) return;
+      if (next) {
+        syncHtmlFromEditor();
+        editor.hidden = true;
+        htmlSource.hidden = false;
+        toggleHtmlBtn.classList.add('active');
+        toggleHtmlBtn.setAttribute('aria-pressed', 'true');
+        toggleHtmlBtn.textContent = '일반';
+        htmlSource.focus();
+      } else {
+        applyHtmlToEditor();
+        htmlSource.hidden = true;
+        editor.hidden = false;
+        toggleHtmlBtn.classList.remove('active');
+        toggleHtmlBtn.setAttribute('aria-pressed', 'false');
+        toggleHtmlBtn.textContent = 'HTML';
+        editor.focus();
+        rememberSelection();
+      }
+      isHtmlMode = next;
+    }
+
+    toggleHtmlBtn.addEventListener('click', () => setHtmlMode(!isHtmlMode));
+
     function rememberSelection() {
+      if (isHtmlMode) return;
       const selection = window.getSelection();
       if (!selection || !selection.rangeCount) return;
       const range = selection.getRangeAt(0);
@@ -211,6 +299,11 @@
     }
     document.getElementById('addLinkBtn').addEventListener('click', () => {
       const url = normalizeUrl(prompt('연결할 URL을 입력하세요.'));
+      if (isHtmlMode) {
+        if (!url) return;
+        insertAtTextareaCursor(htmlSource, `<a href="${escapeAttr(url)}" target="_blank" rel="noopener noreferrer">링크 텍스트</a>`);
+        return;
+      }
       if (!url) return;
       if (applyLinkToSelectedImage(url)) { normalizeEditorLinks(); editor.focus(); return; }
       editor.focus();
@@ -223,8 +316,10 @@
     });
     topSaveBtn.addEventListener('click', () => document.getElementById('postForm').requestSubmit());
     document.getElementById('logoutBtn').addEventListener('click', () => { localStorage.removeItem(tokenKey); location.href = '/'; });
-    document.querySelectorAll('[data-command]').forEach((btn) => btn.addEventListener('click', () => { editor.focus(); document.execCommand(btn.dataset.command, false, null); }));
-    document.getElementById('addSubTitle').addEventListener('click', () => { editor.focus(); document.execCommand('formatBlock', false, 'h2'); });
+    document.querySelectorAll('[data-command]').forEach((btn) => btn.addEventListener('click', () => { if (isHtmlMode) { const snippet = btn.dataset.command === 'bold' ? '<strong>굵게 표시할 문장</strong>' : `<ul>
+  <li>목록 항목</li>
+</ul>`; insertAtTextareaCursor(htmlSource, snippet); setSaveStatus('HTML 모드에서는 굵게/목록 태그를 직접 넣습니다.', ''); return; } editor.focus(); document.execCommand(btn.dataset.command, false, null); }));
+    document.getElementById('addSubTitle').addEventListener('click', () => { if (isHtmlMode) { insertAtTextareaCursor(htmlSource, '<h2>소제목</h2>'); return; } editor.focus(); document.execCommand('formatBlock', false, 'h2'); });
 
     function resetImageModal() { uploadStatus.className = 'status'; uploadStatus.textContent = ''; previewList.innerHTML = ''; imageInput.value = ''; dropZone.classList.remove('dragover'); }
     openImageModal.addEventListener('click', () => { resetImageModal(); imageModal.classList.add('active'); imageModal.setAttribute('aria-hidden', 'false'); });
@@ -297,12 +392,19 @@
       }
     }
     function insertImage(url, alt, previewUrl) {
+      const htmlForSave = `<figure class="image-figure"><img src="${escapeAttr(url)}" alt="${escapeAttr(alt || '')}"></figure>
+<p></p>`;
+      if (isHtmlMode) {
+        insertAtTextareaCursor(htmlSource, htmlForSave);
+        return;
+      }
       editor.focus();
       const html = `<figure class="image-figure"><img src="${escapeAttr(previewUrl || url)}" data-upload-src="${escapeAttr(url)}" alt="${escapeAttr(alt || '')}"></figure><p><br></p>`;
       document.execCommand('insertHTML', false, html);
       requestAnimationFrame(() => { editor.scrollTop = editor.scrollHeight; });
     }
     function getContentHtmlForSave() {
+      if (isHtmlMode) return clientSanitizeHtml(htmlSource.value).trim();
       const clone = editor.cloneNode(true);
       clone.querySelectorAll('img[data-upload-src]').forEach((img) => { img.setAttribute('src', img.getAttribute('data-upload-src')); img.removeAttribute('data-upload-src'); });
       clone.querySelectorAll('.selected-editor-image').forEach((img) => img.classList.remove('selected-editor-image'));

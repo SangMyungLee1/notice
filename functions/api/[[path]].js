@@ -493,12 +493,23 @@ function cleanText(value) {
 
 function sanitizeAdminHtml(html) {
   let out = String(html || '');
+  const bodyMatch = out.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+  if (bodyMatch) out = bodyMatch[1];
+  out = out.replace(/<!doctype[^>]*>/gi, '');
+  out = out.replace(/<head[\s\S]*?<\/head>/gi, '');
   out = out.replace(/<script[\s\S]*?<\/script>/gi, '');
   out = out.replace(/<style[\s\S]*?<\/style>/gi, '');
-  out = out.replace(/\son\w+=("[^"]*"|'[^']*'|[^\s>]+)/gi, '');
-  out = out.replace(/javascript:/gi, '');
   out = out.replace(/<iframe[\s\S]*?<\/iframe>/gi, '');
-  return out;
+  out = out.replace(/<object[\s\S]*?<\/object>/gi, '');
+  out = out.replace(/<embed[\s\S]*?>/gi, '');
+  out = out.replace(/<form[\s\S]*?<\/form>/gi, '');
+  out = out.replace(/<(?:input|textarea|button|select|option|meta|title|link|base)[\s\S]*?>[\s\S]*?<\/(?:textarea|button|select|option|title)>/gi, '');
+  out = out.replace(/<(?:input|meta|link|base)[^>]*>/gi, '');
+  out = out.replace(/<\/?(?:html|body)[^>]*>/gi, '');
+  out = out.replace(/\s(?:on\w+|srcdoc)=("[^"]*"|'[^']*'|[^\s>]+)/gi, '');
+  out = out.replace(/(href|src)=("|')\s*javascript:[^"']*\2/gi, '$1="#"');
+  out = out.replace(/javascript:/gi, '');
+  return out.trim();
 }
 
 function stripTags(html) {
