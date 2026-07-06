@@ -99,6 +99,18 @@ a:hover { color: var(--point); }
 }
 
 .nav a:hover { color: #fff; background: rgba(255,255,255,0.2); }
+.nav a.nav-active {
+  background: #ffffff;
+  color: #1e3a8a;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.2);
+  font-weight: 900;
+}
+
+.nav a.nav-active:hover {
+  background: #ffffff;
+  color: #1e3a8a;
+}
+
 .btn:hover { transform: translateY(-1px); }
 .btn-primary { background: var(--point); color: #fff; }
 .btn-primary:hover { background: var(--point-dark); color: #fff; }
@@ -436,6 +448,43 @@ a:hover { color: var(--point); }
 .image-figure { margin: 18px 0; }
 .editor figure { margin: 18px 0; }
 .editor figcaption { display: none; }
+
+
+/* Compact editor spacing: reduce the gap created by Enter inside the writing/editing box. */
+.admin-card .editor {
+  line-height: 1.55;
+}
+.admin-card .editor p,
+.admin-card .editor div,
+.admin-card .editor section,
+.admin-card .editor article {
+  margin-top: 0;
+  margin-bottom: 8px;
+  line-height: 1.55;
+}
+.admin-card .editor br {
+  line-height: 1.2;
+}
+.admin-card .editor h2,
+.admin-card .editor h3 {
+  margin-top: 14px;
+  margin-bottom: 8px;
+  line-height: 1.35;
+}
+.admin-card .editor ul,
+.admin-card .editor ol {
+  margin-top: 6px;
+  margin-bottom: 10px;
+  padding-left: 24px;
+}
+.admin-card .editor li {
+  margin-bottom: 5px;
+  line-height: 1.55;
+}
+.admin-card .editor figure,
+.admin-card .editor .image-figure {
+  margin: 10px 0;
+}
 
 .toast {
   position: fixed;

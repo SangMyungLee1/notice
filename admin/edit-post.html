@@ -93,6 +93,10 @@
     }
     lockEditorScrollBox();
 
+    try {
+      document.execCommand('defaultParagraphSeparator', false, 'div');
+    } catch (_) {}
+
     async function verifySession() {
       try {
         const res = await fetch('/api/verify', { headers: { Authorization: `Bearer ${token()}` } });
