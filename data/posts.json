@@ -1,5 +1,33 @@
 [
   {
+    "id": 1025,
+    "title": "포장이사 이미지",
+    "slug": "moving_v-1025.html",
+    "path": "moving/moving_v-1025.html",
+    "board": "moving",
+    "boardName": "포장이사 게시판",
+    "createdAt": "2026-07-20T10:27:46.861Z",
+    "excerpt": "포장이사 이미지 입니다. 포장이사 이미지 관련 포장이사 게시판 자료 이미지 1",
+    "seo": {
+      "pageTitle": "포장이사 이미지",
+      "metaDescription": "포장이사 이미지 입니다. 포장이사 이미지의 핵심 흐름을 본문 기준으로 요약했습니다.",
+      "ogTitle": "포장이사 이미지 안내",
+      "ogDescription": "포장이사 이미지 관련 포장이사 게시판 자료 이미지 1 본문의 분위기와 요점을 살려 소개 문구를 구성했습니다.",
+      "twitterTitle": "포장이사 게시판 글 보기",
+      "twitterDescription": "포장이사 이미지 관련 정보를 찾는 분이 빠르게 이해할 수 있도록 구성했습니다. 필요한 내용을 빠르게 찾기 좋게 요약했습니다.",
+      "jsonLdDescription": "포장이사 이미지 입니다. 포장이사 이미지 관련 포장이사 게시판 자료 이미지 1 이 구조화 데이터는 게시글 제목, 본문 요약, 게시판, 이미지 정보를 함께 설명합니다.",
+      "keywords": "포장이사 이미지, 포장이사, 포장이사 게시판, 이미지, 입니다., 관련",
+      "image": "https://notice.life-helper.co.kr/uploads/2026/07/0def8794d89502504dc1cb21.webp",
+      "images": [
+        "https://notice.life-helper.co.kr/uploads/2026/07/0def8794d89502504dc1cb21.webp"
+      ],
+      "sourcePath": "moving/moving_v-1025.html",
+      "generatedAt": "2026-07-20T10:27:46.861Z"
+    },
+    "image": "https://notice.life-helper.co.kr/uploads/2026/07/0def8794d89502504dc1cb21.webp",
+    "searchText": "포장이사 이미지 입니다. 포장이사 이미지 관련 포장이사 게시판 자료 이미지 1"
+  },
+  {
     "id": 1024,
     "title": "정수기 렌탈 처음이라면? 렌탈료보다 중요한 계약 조건 확인법",
     "slug": "water_v-1024.html",
