@@ -805,7 +805,7 @@ function layout(env, title, description, body, canonicalPath = '/', options = {}
   <meta name="twitter:title" content="${escapeHtml(twitterTitle)}">
   <meta name="twitter:description" content="${escapeHtml(twitterDescription)}">
   <link rel="canonical" href="${escapeHtml(canonicalUrl)}">
-  <link rel="stylesheet" href="/assets/style.css?v=20260706-navstrong2">${jsonLd}
+  <link rel="stylesheet" href="/assets/style.css?v=20260721-ctabanner">${jsonLd}
 </head>
 <body>
   <header class="site-header">

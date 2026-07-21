@@ -207,16 +207,127 @@ a:hover { color: var(--point); }
 
 .post-content p { margin: 0 0 18px; }
 .post-content h2 { margin: 34px 0 12px; font-size: 24px; letter-spacing: -0.04em; }
+/* 본문은 가운데 정렬. 한 줄이 길지 않게 끊어 쓰는 것을 전제로 한다. */
+.post-content { text-align: center; }
 .post-content img {
-  max-width: 100%;
+  max-width: min(100%, 340px);
   height: auto;
   display: block;
-  margin: 22px auto;
+  margin: 20px auto;
   border-radius: 14px;
   border: 1px solid var(--line);
 }
-.post-content figure { margin: 24px 0; }
-.post-content figcaption { display: none; }
+.post-content figure { margin: 22px 0; }
+
+/* 사진 출처 표기. CC BY-SA 이미지는 출처가 보여야 하므로 숨기지 않는다. */
+.post-content figcaption {
+  display: block;
+  max-width: min(100%, 340px);
+  margin: 8px auto 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* 본문 안 CTA 배너. 가로 꽉 채우지 않고 대략 4:1 비율 카드로. */
+.cta-banner {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: min(100%, 460px);
+  min-height: 116px;
+  margin: 32px auto;
+  padding: 18px 22px;
+  text-align: left;
+  border-radius: 22px;
+  background: linear-gradient(135deg, #1e40af 0%, #2563eb 52%, #60a5fa 100%);
+  color: #fff;
+  box-shadow: 0 16px 34px rgba(37, 99, 235, 0.3);
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+.cta-banner:hover {
+  color: #fff;
+  transform: translateY(-3px);
+  box-shadow: 0 22px 44px rgba(37, 99, 235, 0.4);
+}
+/* 일러스트 느낌을 주는 장식 원 */
+.cta-banner::before,
+.cta-banner::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.cta-banner::before {
+  width: 150px;
+  height: 150px;
+  right: -46px;
+  top: -58px;
+  background: rgba(255, 255, 255, 0.16);
+}
+.cta-banner::after {
+  width: 96px;
+  height: 96px;
+  right: 16px;
+  bottom: -54px;
+  background: rgba(255, 255, 255, 0.1);
+}
+.cta-banner-icon {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  font-size: 28px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.22);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.3);
+}
+.cta-banner-text {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.cta-banner-title {
+  display: block;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.35;
+}
+.cta-banner-sub {
+  display: block;
+  margin-top: 5px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.88);
+}
+.cta-banner-arrow {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  font-size: 22px;
+  font-weight: 800;
+  opacity: 0.92;
+}
+.cta-banner-green {
+  background: linear-gradient(135deg, #065f46 0%, #059669 52%, #34d399 100%);
+  box-shadow: 0 16px 34px rgba(5, 150, 105, 0.3);
+}
+.cta-banner-green:hover { box-shadow: 0 22px 44px rgba(5, 150, 105, 0.4); }
+
+@media (max-width: 560px) {
+  .cta-banner { gap: 12px; padding: 16px 18px; min-height: 104px; }
+  .cta-banner-icon { width: 50px; height: 50px; font-size: 24px; }
+  .cta-banner-title { font-size: 15px; }
+  .cta-banner-sub { font-size: 12px; }
+}
 
 .notice-box {
   background: var(--soft);
