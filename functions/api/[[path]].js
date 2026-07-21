@@ -202,7 +202,7 @@ async function handleUpdatePost(request, env) {
     updatedAt,
     excerpt,
     searchText: updatedPost.searchText,
-    url: `${trimSlash(env.SITE_URL)}/${current.path}`
+    url: `${trimSlash(env.SITE_URL)}/${publicPath(current.path)}`
   });
 }
 
@@ -529,6 +529,12 @@ function trimSlash(value) {
   return String(value || '').replace(/\/$/, '');
 }
 
+// Cloudflare Pages는 /foo.html 요청을 /foo 로 308 리다이렉트한다.
+// canonical, sitemap, rss, JSON-LD는 리다이렉트되지 않는 최종 주소를 써야 한다.
+function publicPath(value) {
+  return String(value || '').replace(/\.html$/i, '');
+}
+
 function displayDate(value) {
   try {
     const d = new Date(value);
@@ -711,7 +717,7 @@ function escapeAttr(value) {
 }
 
 function createArticleJsonLd(env, post, board = null) {
-  const url = `${trimSlash(env.SITE_URL)}/${post.path}`;
+  const url = `${trimSlash(env.SITE_URL)}/${publicPath(post.path)}`;
   const seo = post.seo || {};
   const data = {
     '@context': 'https://schema.org',
@@ -747,7 +753,7 @@ function renderArticleNav(posts, currentPost) {
   const prev = index > 0 ? sorted[index - 1] : null;
   const next = index >= 0 && index < sorted.length - 1 ? sorted[index + 1] : null;
   const link = (className, label, post) => post
-    ? `<a class="post-nav-link ${className}" href="/${escapeHtml(post.path)}"><span>${label}</span><strong>${escapeHtml(post.title)}</strong></a>`
+    ? `<a class="post-nav-link ${className}" href="/${escapeHtml(publicPath(post.path))}"><span>${label}</span><strong>${escapeHtml(post.title)}</strong></a>`
     : `<span class="post-nav-link ${className} disabled"><span>${label}</span><strong>글이 없습니다</strong></span>`;
   return `      <nav class="post-nav" aria-label="이전글 다음글">
         ${link('prev', '이전글', prev)}
@@ -757,7 +763,7 @@ function renderArticleNav(posts, currentPost) {
 
 function layout(env, title, description, body, canonicalPath = '/', options = {}, boards = defaultBoards()) {
   const site = trimSlash(env.SITE_URL);
-  const canonicalUrl = site + canonicalPath;
+  const canonicalUrl = site + publicPath(canonicalPath);
   const ogType = options.ogType || 'website';
   const metaDescription = options.metaDescription || description;
   const ogTitle = options.ogTitle || title;
@@ -847,7 +853,7 @@ function renderStaticBoardRows(posts, filterSlug = 'all', limit = 10) {
   if (!rows.length) return '';
   return rows.map((post) => `        <div class="board-row">
           <div class="board-no">${escapeHtml(post.id)}</div>
-          <a class="board-title" href="/${escapeHtml(post.path)}">${escapeHtml(post.title)}</a>
+          <a class="board-title" href="/${escapeHtml(publicPath(post.path))}">${escapeHtml(post.title)}</a>
           <div class="board-date">${displayDate(post.createdAt)}</div>
         </div>`).join('\n');
 }
@@ -970,7 +976,7 @@ function renderSitemap(env, posts, boards = defaultBoards()) {
   const today = new Date().toISOString().slice(0, 10);
   const base = [{ loc: `${site}/`, changefreq: 'daily', priority: '0.8', lastmod: today }]
     .concat(visibleBoards(boards).map((board) => ({ loc: `${site}/${board.path}/`, changefreq: 'hourly', priority: '0.9', lastmod: today })));
-  const urls = base.concat(posts.map((post) => ({ loc: `${site}/${post.path}`, changefreq: 'weekly', priority: '0.7', lastmod: String(post.updatedAt || post.createdAt || '').slice(0, 10) })));
+  const urls = base.concat(posts.map((post) => ({ loc: `${site}/${publicPath(post.path)}`, changefreq: 'weekly', priority: '0.7', lastmod: String(post.updatedAt || post.createdAt || '').slice(0, 10) })));
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls.map((url) => `  <url>
@@ -986,8 +992,8 @@ function renderRss(env, posts) {
   const site = trimSlash(env.SITE_URL);
   const items = posts.slice(0, 30).map((post) => `    <item>
       <title>${escapeHtml(post.title)}</title>
-      <link>${site}/${post.path}</link>
-      <guid>${site}/${post.path}</guid>
+      <link>${site}/${publicPath(post.path)}</link>
+      <guid>${site}/${publicPath(post.path)}</guid>
       <pubDate>${new Date(post.createdAt).toUTCString()}</pubDate>
       <description>${escapeHtml(post.excerpt)}</description>
     </item>`).join('\n');
