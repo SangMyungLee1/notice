@@ -210,19 +210,19 @@ a:hover { color: var(--point); }
 /* 본문은 가운데 정렬. 한 줄이 길지 않게 끊어 쓰는 것을 전제로 한다. */
 .post-content { text-align: center; }
 .post-content img {
-  max-width: min(100%, 340px);
+  max-width: min(100%, 440px);
   height: auto;
   display: block;
-  margin: 20px auto;
+  margin: 22px auto;
   border-radius: 14px;
   border: 1px solid var(--line);
 }
-.post-content figure { margin: 22px 0; }
+.post-content figure { margin: 24px 0; }
 
 /* 사진 출처 표기. CC BY-SA 이미지는 출처가 보여야 하므로 숨기지 않는다. */
 .post-content figcaption {
   display: block;
-  max-width: min(100%, 340px);
+  max-width: min(100%, 440px);
   margin: 8px auto 0;
   font-size: 12px;
   line-height: 1.5;
@@ -236,11 +236,11 @@ a:hover { color: var(--point); }
   overflow: hidden;
   display: flex;
   align-items: center;
-  gap: 14px;
-  width: min(100%, 460px);
-  min-height: 116px;
-  margin: 32px auto;
-  padding: 18px 22px;
+  gap: 16px;
+  width: min(100%, 560px);
+  min-height: 140px;
+  margin: 34px auto;
+  padding: 22px 26px;
   text-align: left;
   border-radius: 22px;
   background: linear-gradient(135deg, #1e40af 0%, #2563eb 52%, #60a5fa 100%);
@@ -279,12 +279,12 @@ a:hover { color: var(--point); }
   position: relative;
   z-index: 1;
   flex: none;
-  width: 58px;
-  height: 58px;
+  width: 68px;
+  height: 68px;
   display: grid;
   place-items: center;
-  font-size: 28px;
-  border-radius: 18px;
+  font-size: 34px;
+  border-radius: 20px;
   background: rgba(255, 255, 255, 0.22);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.3);
 }
@@ -296,15 +296,15 @@ a:hover { color: var(--point); }
 }
 .cta-banner-title {
   display: block;
-  font-size: 17px;
+  font-size: 19px;
   font-weight: 800;
   letter-spacing: -0.03em;
   line-height: 1.35;
 }
 .cta-banner-sub {
   display: block;
-  margin-top: 5px;
-  font-size: 13px;
+  margin-top: 6px;
+  font-size: 14px;
   line-height: 1.5;
   color: rgba(255, 255, 255, 0.88);
 }
@@ -323,10 +323,10 @@ a:hover { color: var(--point); }
 .cta-banner-green:hover { box-shadow: 0 22px 44px rgba(5, 150, 105, 0.4); }
 
 @media (max-width: 560px) {
-  .cta-banner { gap: 12px; padding: 16px 18px; min-height: 104px; }
-  .cta-banner-icon { width: 50px; height: 50px; font-size: 24px; }
-  .cta-banner-title { font-size: 15px; }
-  .cta-banner-sub { font-size: 12px; }
+  .cta-banner { gap: 13px; padding: 18px 18px; min-height: 120px; }
+  .cta-banner-icon { width: 56px; height: 56px; font-size: 27px; }
+  .cta-banner-title { font-size: 16px; }
+  .cta-banner-sub { font-size: 13px; }
 }
 
 .notice-box {

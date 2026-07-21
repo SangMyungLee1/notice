@@ -782,6 +782,8 @@ function layout(env, title, description, body, canonicalPath = '/', options = {}
   <meta property="article:modified_time" content="${escapeHtml(options.modifiedTime || options.publishedTime)}">` : '';
   const jsonLd = options.jsonLd ? `
   <script type="application/ld+json">${safeScriptJson(options.jsonLd)}</script>` : '';
+  const robots = options.noindex ? `
+  <meta name="robots" content="noindex, follow">` : '';
   const activeNav = options.activeNav || (canonicalPath === '/' ? 'home' : '');
   const homeNavAttr = activeNav === 'home' ? ' class="nav-active nav-current" aria-current="page"' : '';
   const nav = visibleBoards(boards).map((board) => {
@@ -794,7 +796,7 @@ function layout(env, title, description, body, canonicalPath = '/', options = {}
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${escapeHtml(title)}</title>
-  <meta name="description" content="${escapeHtml(metaDescription)}">${keywords}
+  <meta name="description" content="${escapeHtml(metaDescription)}">${keywords}${robots}
   <meta property="og:locale" content="ko_KR">
   <meta property="og:site_name" content="올딜 생활게시판">
   <meta property="og:title" content="${escapeHtml(ogTitle)}">
@@ -959,9 +961,27 @@ ${renderArticleNav(posts, post)}
   }, boards);
 }
 
+// Cloudflare Pages는 매칭되는 파일이 없을 때 /404.html을 404 상태로 내려준다.
+// 이 파일이 없으면 홈이 200으로 응답해 검색엔진에 소프트 404로 잡힌다.
+function render404Page(env, posts, boards) {
+  const body = `    <article class="card post-wrap">
+      <h1 class="post-title">페이지를 찾을 수 없습니다</h1>
+      <div class="post-content">
+<div>요청하신 주소의 글이 삭제되었거나</div>
+<div>주소가 잘못 입력되었습니다.</div>
+<div><br></div>
+<div>아래 게시판에서 필요한 글을 찾아보세요.</div>
+      </div>
+      <p style="margin-top:28px"><a class="btn btn-primary" href="/">홈으로</a></p>
+    </article>
+${renderListSection(posts, boards, null, true)}`;
+  return layout(env, '페이지를 찾을 수 없습니다', '요청하신 페이지를 찾을 수 없습니다. 올딜 생활게시판의 다른 글을 확인해 보세요.', body, '/404', { noindex: true }, boards);
+}
+
 function buildSiteFiles(env, posts, boards) {
   const files = [
     { path: 'index.html', content: renderHomePage(env, posts, boards), encoding: 'utf-8' },
+    { path: '404.html', content: render404Page(env, posts, boards), encoding: 'utf-8' },
     { path: 'sitemap.xml', content: renderSitemap(env, posts, boards), encoding: 'utf-8' },
     { path: 'rss.xml', content: renderRss(env, posts), encoding: 'utf-8' }
   ];
