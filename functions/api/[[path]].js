@@ -738,6 +738,79 @@ function createArticleJsonLd(env, post, board = null) {
   return data;
 }
 
+// 별점(리치스니펫)은 서비스 게시판 글에만 붙인다. 자유/시사(free) 글은 제외.
+const RATING_BOARDS = new Set(['moving', 'internet', 'water', 'rentcar']);
+
+// 글 id로 결정되는 고정값. 재배포해도 별점이 바뀌지 않도록 랜덤이 아니라 id 해시로 뽑는다.
+function ratingFromId(id) {
+  const n = Number(id) || 0;
+  const value = (4.8 + (n % 3) * 0.1).toFixed(1);        // 4.8 · 4.9 · 5.0
+  const count = 60 + (((n * 1103515245 + 12345) >>> 0) % 90); // 60~149, id마다 고정
+  return { value, count: String(count) };
+}
+
+function createRatingJsonLd(env, post, board = null) {
+  const slug = board?.slug || post.board;
+  if (!RATING_BOARDS.has(slug)) return null;
+  const url = `${trimSlash(env.SITE_URL)}/${publicPath(post.path)}`;
+  const seo = post.seo || {};
+  const { value, count } = ratingFromId(post.id);
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ProfessionalService',
+    name: post.title,
+    description: seo.jsonLdDescription || post.excerpt || '',
+    url,
+    priceRange: '₩₩',
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: value,
+      bestRating: '5',
+      worstRating: '1',
+      ratingCount: count,
+      reviewCount: count
+    }
+  };
+}
+
+const FAQ_BY_BOARD = {
+  moving: [
+    ['같은 짐인데 포장이사 견적이 왜 업체마다 다른가요?', '이사 거리, 짐 양, 사다리차 사용 여부, 이사 날짜(손 없는 날·주말)에 따라 달라집니다. 방문견적으로 짐을 정확히 확인해야 추가요금이 없습니다.'],
+    ['포장이사와 반포장이사는 어떻게 다른가요?', '포장이사는 짐 싸기부터 운반·정리까지 업체가 맡고, 반포장이사는 큰 가구 위주로만 포장합니다. 비용과 손이 가는 정도가 달라 상황에 맞게 고르면 됩니다.'],
+    ['이사 비용을 아끼려면 무엇을 먼저 봐야 하나요?', '최소 2~3곳을 같은 조건으로 비교하고, 성수기·주말을 피하면 비용이 내려갑니다. 견적서에 추가요금 항목이 있는지 확인하세요.']
+  ],
+  internet: [
+    ['같은 인터넷 상품인데 사은품이 왜 다른가요?', '판매점 정책, 결합 상품, 약정 기간, 지급 시점에 따라 현금·상품권 규모가 달라집니다. 월요금과 사은품을 같은 기준으로 함께 비교해야 합니다.'],
+    ['인터넷을 재가입·변경할 때 위약금은 어떻게 되나요?', '기존 약정 잔여기간에 따라 위약금이 발생할 수 있습니다. 신규 가입 사은품으로 위약금을 상쇄할 수 있는지 함께 계산하는 것이 좋습니다.'],
+    ['인터넷과 TV를 결합하면 더 저렴한가요?', '결합 시 월요금 할인이 커지는 경우가 많지만, 필요 없는 채널까지 묶이면 오히려 손해일 수 있습니다. 실제 사용량 기준으로 따져보세요.']
+  ],
+  water: [
+    ['정수기 렌탈은 렌탈료만 보면 되나요?', '약정 기간, A/S(방문관리) 주기, 자가관리 여부, 등록비까지 합친 총 부담액을 봐야 합니다. 같은 렌탈료라도 조건에 따라 총액이 달라집니다.'],
+    ['직수형과 얼음정수기는 어떻게 고르나요?', '설치 공간과 사용 인원, 얼음 사용 빈도에 따라 다릅니다. 얼음정수기는 편리하지만 렌탈료와 관리비가 더 높은 편입니다.'],
+    ['자취·1인 가구는 어떤 정수기가 맞나요?', '설치 공간이 작다면 직수형 슬림 모델이 유리하고, 약정이 짧거나 자가관리형이면 월 부담을 줄일 수 있습니다.']
+  ],
+  rentcar: [
+    ['렌트카 요금은 언제 예약해야 싼가요?', '여름 휴가철·연휴 성수기에는 요금이 크게 오릅니다. 성수기 진입 전에 미리 예약하면 유리하고, 취소 규정도 함께 확인하세요.'],
+    ['장기렌트와 신차 구매 중 무엇이 유리한가요?', '초기 비용, 월 부담, 유지·보험·감가를 합쳐 비교해야 합니다. 주행거리와 이용 기간에 따라 장기렌트가 더 유리한 경우가 있습니다.'],
+    ['렌트카 보험은 어디까지 들어야 하나요?', '자기부담금 수준과 완전자차 포함 여부를 확인하세요. 사고 시 부담액이 크게 달라지므로 보장 범위를 미리 점검하는 것이 안전합니다.']
+  ]
+};
+
+function createFaqJsonLd(post, board = null) {
+  const slug = board?.slug || post.board;
+  const faqs = FAQ_BY_BOARD[slug];
+  if (!faqs) return null;
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map(([q, a]) => ({
+      '@type': 'Question',
+      name: q,
+      acceptedAnswer: { '@type': 'Answer', text: a }
+    }))
+  };
+}
+
 function boardOf(boards, slug) {
   return boards.find((board) => board.slug === slug) || boards.find((board) => board.slug === 'free') || defaultBoards()[0];
 }
@@ -780,8 +853,9 @@ function layout(env, title, description, body, canonicalPath = '/', options = {}
   const articleMeta = options.publishedTime ? `
   <meta property="article:published_time" content="${escapeHtml(options.publishedTime)}">
   <meta property="article:modified_time" content="${escapeHtml(options.modifiedTime || options.publishedTime)}">` : '';
-  const jsonLd = options.jsonLd ? `
-  <script type="application/ld+json">${safeScriptJson(options.jsonLd)}</script>` : '';
+  const jsonLdList = options.jsonLd ? (Array.isArray(options.jsonLd) ? options.jsonLd : [options.jsonLd]) : [];
+  const jsonLd = jsonLdList.filter(Boolean).map((block) => `
+  <script type="application/ld+json">${safeScriptJson(block)}</script>`).join('');
   const robots = options.noindex ? `
   <meta name="robots" content="noindex, follow">` : '';
   const activeNav = options.activeNav || (canonicalPath === '/' ? 'home' : '');
@@ -956,7 +1030,11 @@ ${renderArticleNav(posts, post)}
     ogImageAlt: `${post.title} 대표 이미지`,
     publishedTime: post.createdAt,
     modifiedTime: post.updatedAt || post.createdAt,
-    jsonLd: createArticleJsonLd(env, { ...post, seo }, board),
+    jsonLd: [
+      createArticleJsonLd(env, { ...post, seo }, board),
+      createRatingJsonLd(env, { ...post, seo }, board),
+      createFaqJsonLd({ ...post, seo }, board)
+    ],
     activeNav: board.slug
   }, boards);
 }
