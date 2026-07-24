@@ -38,11 +38,5 @@
 /rentcar/*
   Cache-Control: no-store, max-age=0, must-revalidate
 
-/internet-lp/*
-  Cache-Control: no-store, max-age=0, must-revalidate
-
-/pojang-lp/*
-  Cache-Control: no-store, max-age=0, must-revalidate
-
 /assets/*
   Cache-Control: no-store, max-age=0, must-revalidate
