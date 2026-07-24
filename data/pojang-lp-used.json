@@ -1,202 +1,222 @@
 [
   {
     "key": "seoul-mapo:basic",
-    "slug": "seoul-mapo-basic",
+    "seq": 5001,
+    "slug": "moving_v-5001",
     "region": "서울 마포구",
     "regionSlug": "seoul-mapo",
     "angle": "basic",
     "title": "서울 마포구 포장이사 비교견적 최저가 이삿짐센터 연결",
-    "url": "https://notice.life-helper.co.kr/moving/seoul-mapo-basic",
-    "createdAt": "2026-07-24T09:01:25.677Z"
+    "url": "https://notice.life-helper.co.kr/moving/moving_v-5001",
+    "createdAt": "2026-07-24T11:47:52.125Z"
   },
   {
     "key": "seoul-gangnam:basic",
-    "slug": "seoul-gangnam-basic",
+    "seq": 5002,
+    "slug": "moving_v-5002",
     "region": "서울 강남구",
     "regionSlug": "seoul-gangnam",
     "angle": "basic",
     "title": "서울 강남구 포장이사 비교견적 최저가 이삿짐센터 연결",
-    "url": "https://notice.life-helper.co.kr/moving/seoul-gangnam-basic",
-    "createdAt": "2026-07-24T09:01:25.687Z"
+    "url": "https://notice.life-helper.co.kr/moving/moving_v-5002",
+    "createdAt": "2026-07-24T11:47:52.137Z"
   },
   {
     "key": "seoul-songpa:basic",
-    "slug": "seoul-songpa-basic",
+    "seq": 5003,
+    "slug": "moving_v-5003",
     "region": "서울 송파구",
     "regionSlug": "seoul-songpa",
     "angle": "basic",
     "title": "서울 송파구 포장이사 비교견적 최저가 이삿짐센터 연결",
-    "url": "https://notice.life-helper.co.kr/moving/seoul-songpa-basic",
-    "createdAt": "2026-07-24T09:01:25.693Z"
+    "url": "https://notice.life-helper.co.kr/moving/moving_v-5003",
+    "createdAt": "2026-07-24T11:47:52.141Z"
   },
   {
     "key": "seoul-gangseo:basic",
-    "slug": "seoul-gangseo-basic",
+    "seq": 5004,
+    "slug": "moving_v-5004",
     "region": "서울 강서구",
     "regionSlug": "seoul-gangseo",
     "angle": "basic",
     "title": "서울 강서구 포장이사 비교견적 최저가 이삿짐센터 연결",
-    "url": "https://notice.life-helper.co.kr/moving/seoul-gangseo-basic",
-    "createdAt": "2026-07-24T09:01:25.696Z"
+    "url": "https://notice.life-helper.co.kr/moving/moving_v-5004",
+    "createdAt": "2026-07-24T11:47:52.144Z"
   },
   {
     "key": "seoul-seocho:basic",
-    "slug": "seoul-seocho-basic",
+    "seq": 5005,
+    "slug": "moving_v-5005",
     "region": "서울 서초구",
     "regionSlug": "seoul-seocho",
     "angle": "basic",
     "title": "서울 서초구 포장이사 비교견적 최저가 이삿짐센터 연결",
-    "url": "https://notice.life-helper.co.kr/moving/seoul-seocho-basic",
-    "createdAt": "2026-07-24T09:01:25.700Z"
+    "url": "https://notice.life-helper.co.kr/moving/moving_v-5005",
+    "createdAt": "2026-07-24T11:47:52.149Z"
   },
   {
     "key": "seoul-nowon:basic",
-    "slug": "seoul-nowon-basic",
+    "seq": 5006,
+    "slug": "moving_v-5006",
     "region": "서울 노원구",
     "regionSlug": "seoul-nowon",
     "angle": "basic",
     "title": "서울 노원구 포장이사 비교견적 최저가 이삿짐센터 연결",
-    "url": "https://notice.life-helper.co.kr/moving/seoul-nowon-basic",
-    "createdAt": "2026-07-24T09:01:25.706Z"
+    "url": "https://notice.life-helper.co.kr/moving/moving_v-5006",
+    "createdAt": "2026-07-24T11:47:52.154Z"
   },
   {
     "key": "seoul-eunpyeong:basic",
-    "slug": "seoul-eunpyeong-basic",
+    "seq": 5007,
+    "slug": "moving_v-5007",
     "region": "서울 은평구",
     "regionSlug": "seoul-eunpyeong",
     "angle": "basic",
     "title": "서울 은평구 포장이사 비교견적 최저가 이삿짐센터 연결",
-    "url": "https://notice.life-helper.co.kr/moving/seoul-eunpyeong-basic",
-    "createdAt": "2026-07-24T09:01:25.710Z"
+    "url": "https://notice.life-helper.co.kr/moving/moving_v-5007",
+    "createdAt": "2026-07-24T11:47:52.158Z"
   },
   {
     "key": "seoul-gangdong:basic",
-    "slug": "seoul-gangdong-basic",
+    "seq": 5008,
+    "slug": "moving_v-5008",
     "region": "서울 강동구",
     "regionSlug": "seoul-gangdong",
     "angle": "basic",
     "title": "서울 강동구 포장이사 비교견적 최저가 이삿짐센터 연결",
-    "url": "https://notice.life-helper.co.kr/moving/seoul-gangdong-basic",
-    "createdAt": "2026-07-24T09:01:25.714Z"
+    "url": "https://notice.life-helper.co.kr/moving/moving_v-5008",
+    "createdAt": "2026-07-24T11:47:52.161Z"
   },
   {
     "key": "busan-haeundae:basic",
-    "slug": "busan-haeundae-basic",
+    "seq": 5009,
+    "slug": "moving_v-5009",
     "region": "부산 해운대구",
     "regionSlug": "busan-haeundae",
     "angle": "basic",
     "title": "부산 해운대구 포장이사 비교견적 최저가 이삿짐센터 연결",
-    "url": "https://notice.life-helper.co.kr/moving/busan-haeundae-basic",
-    "createdAt": "2026-07-24T09:01:25.718Z"
+    "url": "https://notice.life-helper.co.kr/moving/moving_v-5009",
+    "createdAt": "2026-07-24T11:47:52.165Z"
   },
   {
     "key": "busan-saha:basic",
-    "slug": "busan-saha-basic",
+    "seq": 5010,
+    "slug": "moving_v-5010",
     "region": "부산 사하구",
     "regionSlug": "busan-saha",
     "angle": "basic",
     "title": "부산 사하구 포장이사 비교견적 최저가 이삿짐센터 연결",
-    "url": "https://notice.life-helper.co.kr/moving/busan-saha-basic",
-    "createdAt": "2026-07-24T09:01:25.721Z"
+    "url": "https://notice.life-helper.co.kr/moving/moving_v-5010",
+    "createdAt": "2026-07-24T11:47:52.168Z"
   },
   {
     "key": "busan-suyeong:basic",
-    "slug": "busan-suyeong-basic",
+    "seq": 5011,
+    "slug": "moving_v-5011",
     "region": "부산 수영구",
     "regionSlug": "busan-suyeong",
     "angle": "basic",
     "title": "부산 수영구 포장이사 비교견적 최저가 이삿짐센터 연결",
-    "url": "https://notice.life-helper.co.kr/moving/busan-suyeong-basic",
-    "createdAt": "2026-07-24T09:01:25.724Z"
+    "url": "https://notice.life-helper.co.kr/moving/moving_v-5011",
+    "createdAt": "2026-07-24T11:47:52.171Z"
   },
   {
     "key": "busan-geumjeong:basic",
-    "slug": "busan-geumjeong-basic",
+    "seq": 5012,
+    "slug": "moving_v-5012",
     "region": "부산 금정구",
     "regionSlug": "busan-geumjeong",
     "angle": "basic",
     "title": "부산 금정구 포장이사 비교견적 최저가 이삿짐센터 연결",
-    "url": "https://notice.life-helper.co.kr/moving/busan-geumjeong-basic",
-    "createdAt": "2026-07-24T09:01:25.727Z"
+    "url": "https://notice.life-helper.co.kr/moving/moving_v-5012",
+    "createdAt": "2026-07-24T11:47:52.174Z"
   },
   {
     "key": "busan-dongnae:basic",
-    "slug": "busan-dongnae-basic",
+    "seq": 5013,
+    "slug": "moving_v-5013",
     "region": "부산 동래구",
     "regionSlug": "busan-dongnae",
     "angle": "basic",
     "title": "부산 동래구 포장이사 비교견적 최저가 이삿짐센터 연결",
-    "url": "https://notice.life-helper.co.kr/moving/busan-dongnae-basic",
-    "createdAt": "2026-07-24T09:01:25.730Z"
+    "url": "https://notice.life-helper.co.kr/moving/moving_v-5013",
+    "createdAt": "2026-07-24T11:47:52.178Z"
   },
   {
     "key": "busan-yeonje:basic",
-    "slug": "busan-yeonje-basic",
+    "seq": 5014,
+    "slug": "moving_v-5014",
     "region": "부산 연제구",
     "regionSlug": "busan-yeonje",
     "angle": "basic",
     "title": "부산 연제구 포장이사 비교견적 최저가 이삿짐센터 연결",
-    "url": "https://notice.life-helper.co.kr/moving/busan-yeonje-basic",
-    "createdAt": "2026-07-24T09:01:25.734Z"
+    "url": "https://notice.life-helper.co.kr/moving/moving_v-5014",
+    "createdAt": "2026-07-24T11:47:52.181Z"
   },
   {
     "key": "gyeonggi-suwon:basic",
-    "slug": "gyeonggi-suwon-basic",
+    "seq": 5015,
+    "slug": "moving_v-5015",
     "region": "경기 수원시",
     "regionSlug": "gyeonggi-suwon",
     "angle": "basic",
     "title": "경기 수원시 포장이사 비교견적 최저가 이삿짐센터 연결",
-    "url": "https://notice.life-helper.co.kr/moving/gyeonggi-suwon-basic",
-    "createdAt": "2026-07-24T09:01:25.738Z"
+    "url": "https://notice.life-helper.co.kr/moving/moving_v-5015",
+    "createdAt": "2026-07-24T11:47:52.184Z"
   },
   {
     "key": "gyeonggi-seongnam:basic",
-    "slug": "gyeonggi-seongnam-basic",
+    "seq": 5016,
+    "slug": "moving_v-5016",
     "region": "경기 성남시",
     "regionSlug": "gyeonggi-seongnam",
     "angle": "basic",
     "title": "경기 성남시 포장이사 비교견적 최저가 이삿짐센터 연결",
-    "url": "https://notice.life-helper.co.kr/moving/gyeonggi-seongnam-basic",
-    "createdAt": "2026-07-24T09:01:25.742Z"
+    "url": "https://notice.life-helper.co.kr/moving/moving_v-5016",
+    "createdAt": "2026-07-24T11:47:52.188Z"
   },
   {
     "key": "gyeonggi-goyang:basic",
-    "slug": "gyeonggi-goyang-basic",
+    "seq": 5017,
+    "slug": "moving_v-5017",
     "region": "경기 고양시",
     "regionSlug": "gyeonggi-goyang",
     "angle": "basic",
     "title": "경기 고양시 포장이사 비교견적 최저가 이삿짐센터 연결",
-    "url": "https://notice.life-helper.co.kr/moving/gyeonggi-goyang-basic",
-    "createdAt": "2026-07-24T09:01:25.746Z"
+    "url": "https://notice.life-helper.co.kr/moving/moving_v-5017",
+    "createdAt": "2026-07-24T11:47:52.191Z"
   },
   {
     "key": "gyeonggi-yongin:basic",
-    "slug": "gyeonggi-yongin-basic",
+    "seq": 5018,
+    "slug": "moving_v-5018",
     "region": "경기 용인시",
     "regionSlug": "gyeonggi-yongin",
     "angle": "basic",
     "title": "경기 용인시 포장이사 비교견적 최저가 이삿짐센터 연결",
-    "url": "https://notice.life-helper.co.kr/moving/gyeonggi-yongin-basic",
-    "createdAt": "2026-07-24T09:01:25.749Z"
+    "url": "https://notice.life-helper.co.kr/moving/moving_v-5018",
+    "createdAt": "2026-07-24T11:47:52.194Z"
   },
   {
     "key": "gyeonggi-bucheon:basic",
-    "slug": "gyeonggi-bucheon-basic",
+    "seq": 5019,
+    "slug": "moving_v-5019",
     "region": "경기 부천시",
     "regionSlug": "gyeonggi-bucheon",
     "angle": "basic",
     "title": "경기 부천시 포장이사 비교견적 최저가 이삿짐센터 연결",
-    "url": "https://notice.life-helper.co.kr/moving/gyeonggi-bucheon-basic",
-    "createdAt": "2026-07-24T09:01:25.753Z"
+    "url": "https://notice.life-helper.co.kr/moving/moving_v-5019",
+    "createdAt": "2026-07-24T11:47:52.197Z"
   },
   {
     "key": "gyeonggi-ansan:basic",
-    "slug": "gyeonggi-ansan-basic",
+    "seq": 5020,
+    "slug": "moving_v-5020",
     "region": "경기 안산시",
     "regionSlug": "gyeonggi-ansan",
     "angle": "basic",
     "title": "경기 안산시 포장이사 비교견적 최저가 이삿짐센터 연결",
-    "url": "https://notice.life-helper.co.kr/moving/gyeonggi-ansan-basic",
-    "createdAt": "2026-07-24T09:01:25.757Z"
+    "url": "https://notice.life-helper.co.kr/moving/moving_v-5020",
+    "createdAt": "2026-07-24T11:47:52.199Z"
   }
 ]
