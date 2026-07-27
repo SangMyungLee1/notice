@@ -1152,6 +1152,188 @@ function gtag_report_conversion(url) {
         }
     }
 
+    
+    /* 인터넷가입시 유의사항 박스 (2026-07-27 추가) */
+    .internet-caution-wrap {
+        margin-top: 34px;
+        padding: 30px 26px;
+        background: rgba(255, 255, 255, 0.92);
+        border: 1px solid var(--border);
+        border-radius: 28px;
+        box-shadow: 0 10px 28px rgba(15, 23, 42, 0.05);
+    }
+
+    .internet-caution-head {
+        text-align: center;
+        margin-bottom: 24px;
+    }
+
+    .internet-caution-main-image {
+        width: min(100%, 980px);
+        aspect-ratio: 16 / 5;
+        margin: 0 auto 24px;
+        border-radius: 26px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+        background: linear-gradient(135deg, #e8efff 0%, #ffffff 100%);
+        box-shadow: 0 12px 26px rgba(15, 23, 42, 0.06);
+    }
+
+    .internet-caution-main-image img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .internet-caution-kicker {
+        display: inline-block;
+        margin-bottom: 14px;
+        padding: 11px 22px;
+        border-radius: 999px;
+        background: var(--primary-soft);
+        color: var(--primary);
+        font-size: 20px;
+        font-weight: 950;
+        letter-spacing: -0.035em;
+        box-shadow: 0 8px 18px rgba(65, 105, 225, 0.10);
+    }
+
+    .internet-caution-title {
+        margin: 0 0 10px;
+        color: var(--foreground);
+        font-size: clamp(26px, 3vw, 36px);
+        line-height: 1.3;
+        letter-spacing: -0.05em;
+        font-weight: 950;
+    }
+
+    .internet-caution-sub {
+        margin: 0;
+        color: var(--muted);
+        font-size: 15px;
+        line-height: 1.7;
+        word-break: keep-all;
+    }
+
+    .internet-caution-card {
+        height: 100%;
+        background: #ffffff;
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        overflow: hidden;
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.04);
+        transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+    }
+
+    .internet-caution-card:hover {
+        transform: translateY(-4px);
+        border-color: var(--primary);
+        box-shadow: 0 16px 32px rgba(15, 23, 42, 0.08);
+    }
+
+    .internet-caution-thumb {
+        position: relative;
+        aspect-ratio: 16 / 10;
+        overflow: hidden;
+        background: #eaf1fb;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .internet-caution-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .internet-caution-badge {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 54px;
+        height: 54px;
+        padding: 0 14px;
+        border-radius: 999px;
+        background: rgba(65, 105, 225, 0.95);
+        color: #ffffff;
+        font-size: 23px;
+        line-height: 1;
+        font-weight: 950;
+        box-shadow: 0 8px 16px rgba(65, 105, 225, 0.22);
+    }
+
+    .internet-caution-body {
+        padding: 18px 18px 20px;
+    }
+
+    .internet-caution-card h4 {
+        margin: 0 0 10px;
+        color: var(--foreground);
+        font-size: 20px;
+        line-height: 1.4;
+        letter-spacing: -0.04em;
+        font-weight: 950;
+        word-break: keep-all;
+    }
+
+    .internet-caution-card p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.7;
+        word-break: keep-all;
+    }
+
+    .internet-caution-card .point-text {
+        color: var(--primary);
+        font-weight: 800;
+    }
+
+    @media (max-width: 768px) {
+        .internet-caution-wrap {
+            margin-top: 24px;
+            padding: 24px 18px;
+            border-radius: 22px;
+        }
+
+        .internet-caution-head {
+            margin-bottom: 18px;
+        }
+
+        .internet-caution-main-image {
+            aspect-ratio: 16 / 7;
+            margin-bottom: 18px;
+            border-radius: 20px;
+        }
+
+        .internet-caution-kicker {
+            font-size: 17px;
+            padding: 9px 18px;
+        }
+
+        .internet-caution-badge {
+            min-width: 46px;
+            height: 46px;
+            font-size: 20px;
+        }
+
+        .internet-caution-sub {
+            font-size: 14px;
+        }
+
+        .internet-caution-card h4 {
+            font-size: 18px;
+        }
+
+        .internet-caution-card p {
+            font-size: 13px;
+        }
+    }
+
     </style>
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"경북 경주시 인터넷 현금지원 TV지원 혜택비교","description":"경북 경주시 인터넷 현금지원 TV지원 혜택비교 — 경북 경주시 현금·TV 지원부터 통신사변경·재가입·TV결합까지 한 번에 정리","datePublished":"2026-07-27T00:06:37.734Z","dateModified":"2026-07-27T00:06:37.734Z","mainEntityOfPage":{"@type":"WebPage","@id":"https://notice.life-helper.co.kr/internet/internet_v-1185"},"url":"https://notice.life-helper.co.kr/internet/internet_v-1185","articleSection":"인터넷가입 게시판","author":{"@type":"Organization","name":"올딜 생활게시판"},"publisher":{"@type":"Organization","name":"올딜 생활게시판"}}</script>
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://notice.life-helper.co.kr/"},{"@type":"ListItem","position":2,"name":"인터넷가입 게시판","item":"https://notice.life-helper.co.kr/internet/"},{"@type":"ListItem","position":3,"name":"경북 경주시 인터넷 현금지원 TV지원 혜택비교","item":"https://notice.life-helper.co.kr/internet/internet_v-1185"}]}</script>
@@ -1344,6 +1526,127 @@ function gtag_report_conversion(url) {
                     위 양식에 간단히 신청을 남겨주시면 고객님께 딱 맞는 맞춤형 최저 요금을 컨설팅해 드립니다!
                 </p>
             </div>
+            <!-- 인터넷가입 주의점 박스 시작 -->
+            <div class="internet-caution-wrap">
+                <div class="internet-caution-head">
+                    <div class="internet-caution-main-image">
+                        <img src="https://life-helper.co.kr/internet/image/internet-caution-main.webp" alt="인터넷 가입시 유의사항">
+                    </div>
+                    <span class="internet-caution-kicker">가입 전 꼭 체크</span>
+                    <h3 class="internet-caution-title font-title">
+                        인터넷가입, 혜택만 보지 말고<br>
+                        이 6가지는 꼭 확인하세요
+                    </h3>
+                    <p class="internet-caution-sub">
+                        현금 많이 준다는 말만 듣고 덜컥 신청했다가 뒤늦게 아차 싶으면 속상하잖아요.<br>
+                        아래 내용만 미리 체크해도 불필요한 지출과 가입 실수를 크게 줄일 수 있습니다.
+                    </p>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-lg-4 col-md-6">
+                        <div class="internet-caution-card">
+                            <div class="internet-caution-thumb">
+                                <img src="https://life-helper.co.kr/internet/image/internet-tip-1.webp" alt="현금지원 조건 확인">
+                                <span class="internet-caution-badge">01</span>
+                            </div>
+                            <div class="internet-caution-body">
+                                <h4 class="font-title">현금지원 금액만 보고<br>바로 결정하지 않기</h4>
+                                <p>
+                                    혜택 금액이 커 보여도 <span class="point-text">언제 지급되는지, 어떤 조건에서 지급되는지</span>
+                                    꼭 같이 봐야 합니다. 설치 완료 기준인지, 개통 후 지급인지까지 확인해야
+                                    기분 좋게 받고 끝낼 수 있어요.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4 col-md-6">
+                        <div class="internet-caution-card">
+                            <div class="internet-caution-thumb">
+                                <img src="https://life-helper.co.kr/internet/image/internet-tip-2.webp" alt="월요금과 사은품 비교">
+                                <span class="internet-caution-badge">02</span>
+                            </div>
+                            <div class="internet-caution-body">
+                                <h4 class="font-title">월요금과 사은품을<br>반드시 같이 비교하기</h4>
+                                <p>
+                                    사은품이 많아 보여도 월요금이 높으면 3년 약정 동안 총지출이 더 커질 수 있습니다.
+                                    그래서 <span class="point-text">한 번 받을 혜택</span>만 보지 말고
+                                    <span class="point-text">매달 나가는 요금</span>까지 함께 비교하는 게 중요합니다.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4 col-md-6">
+                        <div class="internet-caution-card">
+                            <div class="internet-caution-thumb">
+                                <img src="https://life-helper.co.kr/internet/image/internet-tip-3.webp" alt="휴대폰 결합할인 확인">
+                                <span class="internet-caution-badge">03</span>
+                            </div>
+                            <div class="internet-caution-body">
+                                <h4 class="font-title">휴대폰 결합할인부터<br>먼저 확인하기</h4>
+                                <p>
+                                    같은 인터넷이라도 휴대폰 결합 여부에 따라 체감 요금이 확 달라질 수 있습니다.
+                                    본인 회선뿐 아니라 <span class="point-text">가족 회선 수와 통신사</span>까지 같이 보면
+                                    생각보다 큰 할인 차이가 생길 수 있어요.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4 col-md-6">
+                        <div class="internet-caution-card">
+                            <div class="internet-caution-thumb">
+                                <img src="https://life-helper.co.kr/internet/image/internet-tip-4.webp" alt="인터넷 속도 선택">
+                                <span class="internet-caution-badge">04</span>
+                            </div>
+                            <div class="internet-caution-body">
+                                <h4 class="font-title">인터넷 속도는 무조건<br>빠른 게 정답은 아닙니다</h4>
+                                <p>
+                                    혼자 가볍게 쓰는 집과 게임, OTT, 재택근무를 함께 쓰는 집은 필요한 속도가 다릅니다.
+                                    <span class="point-text">100메가, 500메가, 1기가</span> 중에서
+                                    사용 패턴에 맞게 고르는 게 더 똑똑한 선택이에요.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4 col-md-6">
+                        <div class="internet-caution-card">
+                            <div class="internet-caution-thumb">
+                                <img src="https://life-helper.co.kr/internet/image/internet-tip-5.webp" alt="설치비와 약정기간 확인">
+                                <span class="internet-caution-badge">05</span>
+                            </div>
+                            <div class="internet-caution-body">
+                                <h4 class="font-title">설치비, 장비임대료,<br>약정기간까지 확인하기</h4>
+                                <p>
+                                    월요금만 보고 신청했다가 설치비나 셋톱박스 임대료, 약정기간 때문에 놀라는 경우도 있습니다.
+                                    가입 전에는 <span class="point-text">총 비용 구조</span>를 한 번에 확인해두는 게 가장 안전합니다.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4 col-md-6">
+                        <div class="internet-caution-card">
+                            <div class="internet-caution-thumb">
+                                <img src="https://life-helper.co.kr/internet/image/internet-tip-6.webp" alt="기존 인터넷 해지 타이밍">
+                                <span class="internet-caution-badge">06</span>
+                            </div>
+                            <div class="internet-caution-body">
+                                <h4 class="font-title">기존 인터넷은<br>해지 타이밍을 조심하기</h4>
+                                <p>
+                                    새 인터넷 설치 전에 기존 회선을 먼저 해지하면 며칠 동안 인터넷이 끊길 수도 있습니다.
+                                    특히 이사나 재택근무가 있다면 <span class="point-text">새 회선 설치 후 기존 회선 정리</span>가 훨씬 안전합니다.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- 인터넷가입 주의점 박스 끝 -->
+
             
         </div>
     </section>
