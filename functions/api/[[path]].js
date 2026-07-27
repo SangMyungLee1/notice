@@ -887,7 +887,7 @@ function layout(env, title, description, body, canonicalPath = '/', options = {}
   <header class="site-header">
     <div class="header-inner">
       <a class="logo" href="/"><span class="logo-badge">올</span><span>올딜 생활게시판</span></a>
-      <h1 class="hero-title">생활 서비스 문의와 안내를 모아둔 게시판</h1>
+      <p class="hero-title">생활 서비스 문의와 안내를 모아둔 게시판</p>
       <p class="hero-desc">포장이사, 인터넷가입, 정수기렌탈, 렌트카처럼 비교가 필요한 생활 정보를 게시판별로 정리합니다.</p>
       <nav class="nav">
         <a href="/"${homeNavAttr}>홈</a>
@@ -960,7 +960,7 @@ function renderListSection(posts, boards, board = null, includeCards = false) {
   return `${cards}    <section class="card post-wrap">
       <div class="board-toolbar">
         <div>
-          <h2 class="section-title${board ? ' board-current-title' : ''}">${escapeHtml(title)}</h2>
+          <h1 class="section-title${board ? ' board-current-title' : ''}">${escapeHtml(title)}</h1>
           <p style="margin:0;color:var(--muted)">${escapeHtml(desc)}</p>
         </div>
         <a class="btn btn-primary" href="/admin/password.html${board ? `?next=${encodeURIComponent(`/admin/write.html?board=${board.slug}`)}` : ''}">글쓰기</a>
