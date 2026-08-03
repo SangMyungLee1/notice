@@ -1164,6 +1164,17 @@ function gtag_report_conversion(url) {
         box-shadow: var(--shadow);
     }
 
+    .header-banner-gif video {
+        display: block;
+        width: 100%;
+        height: auto;
+        object-fit: contain;
+        border-radius: 28px;
+        border: 1px solid var(--border);
+        background: var(--card);
+        box-shadow: var(--shadow);
+    }
+
     @media (max-width: 768px) {
         .header-banner-gif {
             margin-top: 16px;
@@ -1171,6 +1182,10 @@ function gtag_report_conversion(url) {
         }
 
         .header-banner-gif img {
+            border-radius: 20px;
+        }
+
+        .header-banner-gif video {
             border-radius: 20px;
         }
     }
