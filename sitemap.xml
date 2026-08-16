@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://notice.life-helper.co.kr/</loc><lastmod>2026-08-15</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
-  <url><loc>https://notice.life-helper.co.kr/ab-qna/</loc><lastmod>2026-08-15</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://notice.life-helper.co.kr/moving/</loc><lastmod>2026-08-15</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://notice.life-helper.co.kr/internet/</loc><lastmod>2026-08-15</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://notice.life-helper.co.kr/water/</loc><lastmod>2026-08-15</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://notice.life-helper.co.kr/rentcar/</loc><lastmod>2026-08-15</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://notice.life-helper.co.kr/</loc><lastmod>2026-08-16</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://notice.life-helper.co.kr/ab-qna/</loc><lastmod>2026-08-16</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://notice.life-helper.co.kr/moving/</loc><lastmod>2026-08-16</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://notice.life-helper.co.kr/internet/</loc><lastmod>2026-08-16</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://notice.life-helper.co.kr/water/</loc><lastmod>2026-08-16</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://notice.life-helper.co.kr/rentcar/</loc><lastmod>2026-08-16</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://notice.life-helper.co.kr/rentcar/rentcar_v-1584</loc><lastmod>2026-08-13</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://notice.life-helper.co.kr/water/water_v-1583</loc><lastmod>2026-08-13</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://notice.life-helper.co.kr/internet/internet_v-1582</loc><lastmod>2026-08-11</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
@@ -152,12 +152,12 @@
   <url><loc>https://notice.life-helper.co.kr/moving/moving_v-1441</loc><lastmod>2026-08-15</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://notice.life-helper.co.kr/moving/moving_v-1440</loc><lastmod>2026-08-15</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://notice.life-helper.co.kr/moving/moving_v-1439</loc><lastmod>2026-08-15</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://notice.life-helper.co.kr/moving/moving_v-1438</loc><lastmod>2026-08-02</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://notice.life-helper.co.kr/moving/moving_v-1437</loc><lastmod>2026-08-02</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://notice.life-helper.co.kr/moving/moving_v-1436</loc><lastmod>2026-08-02</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://notice.life-helper.co.kr/moving/moving_v-1435</loc><lastmod>2026-08-02</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://notice.life-helper.co.kr/moving/moving_v-1434</loc><lastmod>2026-08-02</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://notice.life-helper.co.kr/moving/moving_v-1433</loc><lastmod>2026-08-02</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://notice.life-helper.co.kr/moving/moving_v-1438</loc><lastmod>2026-08-16</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://notice.life-helper.co.kr/moving/moving_v-1437</loc><lastmod>2026-08-16</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://notice.life-helper.co.kr/moving/moving_v-1436</loc><lastmod>2026-08-16</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://notice.life-helper.co.kr/moving/moving_v-1435</loc><lastmod>2026-08-16</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://notice.life-helper.co.kr/moving/moving_v-1434</loc><lastmod>2026-08-16</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://notice.life-helper.co.kr/moving/moving_v-1433</loc><lastmod>2026-08-16</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://notice.life-helper.co.kr/internet/internet_v-1432</loc><lastmod>2026-08-15</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://notice.life-helper.co.kr/internet/internet_v-1431</loc><lastmod>2026-08-15</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://notice.life-helper.co.kr/internet/internet_v-1430</loc><lastmod>2026-08-15</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
@@ -172,20 +172,20 @@
   <url><loc>https://notice.life-helper.co.kr/internet/internet_v-1421</loc><lastmod>2026-08-15</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://notice.life-helper.co.kr/internet/internet_v-1420</loc><lastmod>2026-08-15</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://notice.life-helper.co.kr/internet/internet_v-1419</loc><lastmod>2026-08-15</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://notice.life-helper.co.kr/internet/internet_v-1418</loc><lastmod>2026-08-02</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://notice.life-helper.co.kr/internet/internet_v-1417</loc><lastmod>2026-08-02</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://notice.life-helper.co.kr/internet/internet_v-1416</loc><lastmod>2026-08-02</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://notice.life-helper.co.kr/internet/internet_v-1415</loc><lastmod>2026-08-02</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://notice.life-helper.co.kr/internet/internet_v-1414</loc><lastmod>2026-08-02</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://notice.life-helper.co.kr/internet/internet_v-1413</loc><lastmod>2026-08-02</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://notice.life-helper.co.kr/moving/moving_v-1412</loc><lastmod>2026-08-01</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://notice.life-helper.co.kr/moving/moving_v-1411</loc><lastmod>2026-08-01</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://notice.life-helper.co.kr/moving/moving_v-1410</loc><lastmod>2026-08-01</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://notice.life-helper.co.kr/moving/moving_v-1409</loc><lastmod>2026-08-01</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://notice.life-helper.co.kr/moving/moving_v-1408</loc><lastmod>2026-08-01</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://notice.life-helper.co.kr/moving/moving_v-1407</loc><lastmod>2026-08-01</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://notice.life-helper.co.kr/moving/moving_v-1406</loc><lastmod>2026-08-01</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://notice.life-helper.co.kr/moving/moving_v-1405</loc><lastmod>2026-08-01</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://notice.life-helper.co.kr/internet/internet_v-1418</loc><lastmod>2026-08-16</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://notice.life-helper.co.kr/internet/internet_v-1417</loc><lastmod>2026-08-16</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://notice.life-helper.co.kr/internet/internet_v-1416</loc><lastmod>2026-08-16</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://notice.life-helper.co.kr/internet/internet_v-1415</loc><lastmod>2026-08-16</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://notice.life-helper.co.kr/internet/internet_v-1414</loc><lastmod>2026-08-16</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://notice.life-helper.co.kr/internet/internet_v-1413</loc><lastmod>2026-08-16</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://notice.life-helper.co.kr/moving/moving_v-1412</loc><lastmod>2026-08-16</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://notice.life-helper.co.kr/moving/moving_v-1411</loc><lastmod>2026-08-16</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://notice.life-helper.co.kr/moving/moving_v-1410</loc><lastmod>2026-08-16</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://notice.life-helper.co.kr/moving/moving_v-1409</loc><lastmod>2026-08-16</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://notice.life-helper.co.kr/moving/moving_v-1408</loc><lastmod>2026-08-16</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://notice.life-helper.co.kr/moving/moving_v-1407</loc><lastmod>2026-08-16</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://notice.life-helper.co.kr/moving/moving_v-1406</loc><lastmod>2026-08-16</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://notice.life-helper.co.kr/moving/moving_v-1405</loc><lastmod>2026-08-16</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://notice.life-helper.co.kr/moving/moving_v-1404</loc><lastmod>2026-08-01</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://notice.life-helper.co.kr/moving/moving_v-1403</loc><lastmod>2026-08-01</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://notice.life-helper.co.kr/moving/moving_v-1402</loc><lastmod>2026-08-01</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
@@ -198,14 +198,14 @@
   <url><loc>https://notice.life-helper.co.kr/moving/moving_v-1395</loc><lastmod>2026-08-01</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://notice.life-helper.co.kr/moving/moving_v-1394</loc><lastmod>2026-08-01</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://notice.life-helper.co.kr/moving/moving_v-1393</loc><lastmod>2026-08-01</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://notice.life-helper.co.kr/internet/internet_v-1392</loc><lastmod>2026-08-01</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://notice.life-helper.co.kr/internet/internet_v-1391</loc><lastmod>2026-08-01</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://notice.life-helper.co.kr/internet/internet_v-1390</loc><lastmod>2026-08-01</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://notice.life-helper.co.kr/internet/internet_v-1389</loc><lastmod>2026-08-01</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://notice.life-helper.co.kr/internet/internet_v-1388</loc><lastmod>2026-08-01</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://notice.life-helper.co.kr/internet/internet_v-1387</loc><lastmod>2026-08-01</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://notice.life-helper.co.kr/internet/internet_v-1386</loc><lastmod>2026-08-01</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://notice.life-helper.co.kr/internet/internet_v-1385</loc><lastmod>2026-08-01</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://notice.life-helper.co.kr/internet/internet_v-1392</loc><lastmod>2026-08-16</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://notice.life-helper.co.kr/internet/internet_v-1391</loc><lastmod>2026-08-16</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://notice.life-helper.co.kr/internet/internet_v-1390</loc><lastmod>2026-08-16</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://notice.life-helper.co.kr/internet/internet_v-1389</loc><lastmod>2026-08-16</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://notice.life-helper.co.kr/internet/internet_v-1388</loc><lastmod>2026-08-16</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://notice.life-helper.co.kr/internet/internet_v-1387</loc><lastmod>2026-08-16</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://notice.life-helper.co.kr/internet/internet_v-1386</loc><lastmod>2026-08-16</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://notice.life-helper.co.kr/internet/internet_v-1385</loc><lastmod>2026-08-16</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://notice.life-helper.co.kr/internet/internet_v-1384</loc><lastmod>2026-08-01</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://notice.life-helper.co.kr/internet/internet_v-1383</loc><lastmod>2026-08-01</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://notice.life-helper.co.kr/internet/internet_v-1382</loc><lastmod>2026-08-01</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
@@ -542,25 +542,25 @@
   <url><loc>https://notice.life-helper.co.kr/moving/moving_v-1051</loc><lastmod>2026-08-09</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://notice.life-helper.co.kr/ab-qna/ab-qna_v-1050</loc><lastmod>2026-07-24</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://notice.life-helper.co.kr/rentcar/rentcar_v-1049</loc><lastmod>2026-08-15</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://notice.life-helper.co.kr/water/water_v-1048</loc><lastmod>2026-08-14</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://notice.life-helper.co.kr/water/water_v-1048</loc><lastmod>2026-08-16</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://notice.life-helper.co.kr/internet/internet_v-1047</loc><lastmod>2026-08-09</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://notice.life-helper.co.kr/moving/moving_v-1046</loc><lastmod>2026-08-09</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://notice.life-helper.co.kr/ab-qna/ab-qna_v-1045</loc><lastmod>2026-07-23</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://notice.life-helper.co.kr/rentcar/rentcar_v-1044</loc><lastmod>2026-08-14</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://notice.life-helper.co.kr/water/water_v-1043</loc><lastmod>2026-08-14</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://notice.life-helper.co.kr/rentcar/rentcar_v-1044</loc><lastmod>2026-08-16</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://notice.life-helper.co.kr/water/water_v-1043</loc><lastmod>2026-08-16</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://notice.life-helper.co.kr/internet/internet_v-1042</loc><lastmod>2026-08-09</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://notice.life-helper.co.kr/moving/moving_v-1041</loc><lastmod>2026-08-09</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://notice.life-helper.co.kr/ab-qna/ab-qna_v-1040</loc><lastmod>2026-07-22</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://notice.life-helper.co.kr/rentcar/rentcar_v-1039</loc><lastmod>2026-08-14</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://notice.life-helper.co.kr/water/water_v-1038</loc><lastmod>2026-08-14</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://notice.life-helper.co.kr/rentcar/rentcar_v-1039</loc><lastmod>2026-08-16</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://notice.life-helper.co.kr/water/water_v-1038</loc><lastmod>2026-08-16</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://notice.life-helper.co.kr/internet/internet_v-1037</loc><lastmod>2026-08-09</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://notice.life-helper.co.kr/moving/moving_v-1036</loc><lastmod>2026-08-09</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://notice.life-helper.co.kr/ab-qna/ab-qna_v-1035</loc><lastmod>2026-07-21</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://notice.life-helper.co.kr/ab-qna/ab-qna_v-1034</loc><lastmod>2026-07-21</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://notice.life-helper.co.kr/rentcar/rentcar_v-1033</loc><lastmod>2026-08-14</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://notice.life-helper.co.kr/rentcar/rentcar_v-1032</loc><lastmod>2026-08-14</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://notice.life-helper.co.kr/rentcar/rentcar_v-1033</loc><lastmod>2026-08-16</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://notice.life-helper.co.kr/rentcar/rentcar_v-1032</loc><lastmod>2026-08-16</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://notice.life-helper.co.kr/water/water_v-1031</loc><lastmod>2026-08-15</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://notice.life-helper.co.kr/water/water_v-1030</loc><lastmod>2026-08-14</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://notice.life-helper.co.kr/water/water_v-1030</loc><lastmod>2026-08-16</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://notice.life-helper.co.kr/internet/internet_v-1029</loc><lastmod>2026-08-09</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://notice.life-helper.co.kr/moving/moving_v-1028</loc><lastmod>2026-08-09</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://notice.life-helper.co.kr/internet/internet_v-1027</loc><lastmod>2026-08-09</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
