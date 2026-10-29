@@ -69,20 +69,20 @@
 /* Animate only the action row, never the complete provider card. */
 .offer-card__cta{position:relative;isolation:isolate;overflow:hidden;padding:12px 11px 10px;border:2px solid rgba(36,95,199,.3);border-radius:13px;background:linear-gradient(105deg,#e7f1ff 0%,#fff 45%,#e3fff5 100%);box-shadow:0 0 0 2px rgba(36,95,199,.08),0 6px 16px rgba(20,49,96,.15)}
 .offer-card__cta>*{position:relative;z-index:1}
-.offer-card__cta:after{position:absolute;z-index:0;top:-55%;left:-64%;width:48%;height:210%;content:"";pointer-events:none;background:linear-gradient(105deg,transparent,rgba(255,255,255,.98),rgba(255,255,255,.98),transparent);transform:skewX(-22deg)}
-.offer-card__click{box-shadow:0 4px 0 rgba(0,0,0,.13),0 7px 15px rgba(20,49,96,.28)}
+.offer-card__cta:after{position:absolute;z-index:0;top:-55%;left:-64%;width:36%;height:210%;content:"";pointer-events:none;background:linear-gradient(105deg,transparent,rgba(255,255,255,.8),rgba(255,255,255,.8),transparent);transform:skewX(-22deg)}
+.offer-card__click{box-shadow:0 2px 0 rgba(0,0,0,.11),0 4px 10px rgba(20,49,96,.2)}
 .offer-card__click:after{animation:none}
-.offer-card__cta{animation:cardActionHeartbeat 1.35s cubic-bezier(.36,.07,.19,.97) infinite}
-.offer-card__cta:after{animation:cardActionShine 1.8s ease-in-out infinite}
-.offer-card__click{animation:cardActionClick 1.05s ease-in-out infinite}
-.offer-card__cta b{animation:cardActionArrow .8s ease-in-out infinite alternate}
+.offer-card__cta{animation:cardActionHeartbeat 2.1s cubic-bezier(.36,.07,.19,.97) infinite}
+.offer-card__cta:after{animation:cardActionShine 2.8s ease-in-out infinite}
+.offer-card__click{animation:cardActionClick 1.75s ease-in-out infinite}
+.offer-card__cta b{animation:cardActionArrow 1.35s ease-in-out infinite alternate}
 .offer-card:nth-child(2) .offer-card__cta,.offer-card:nth-child(2) .offer-card__cta:after{animation-delay:.28s}
 .offer-card:nth-child(3) .offer-card__cta,.offer-card:nth-child(3) .offer-card__cta:after{animation-delay:.54s}
 .offer-card:nth-child(4) .offer-card__cta,.offer-card:nth-child(4) .offer-card__cta:after{animation-delay:.8s}
-@keyframes cardActionHeartbeat{0%,100%{transform:translateY(0) scale(1);filter:brightness(1);box-shadow:0 0 0 2px rgba(36,95,199,.08),0 6px 16px rgba(20,49,96,.15)}50%{transform:translateY(-2px) scale(1.045);filter:brightness(1.14) saturate(1.13);box-shadow:0 0 0 7px rgba(36,95,199,.22),0 12px 24px rgba(20,83,161,.32)}}
-@keyframes cardActionShine{0%,22%{left:-64%}64%,100%{left:138%}}
-@keyframes cardActionClick{0%,100%{transform:scale(1)}50%{transform:scale(1.14);filter:brightness(1.2);box-shadow:0 4px 0 rgba(0,0,0,.13),0 0 0 6px rgba(36,95,199,.2),0 9px 19px rgba(20,49,96,.32)}}
-@keyframes cardActionArrow{from{transform:translateX(0) scale(1)}to{transform:translateX(9px) scale(1.14);filter:brightness(1.25)}}
+@keyframes cardActionHeartbeat{0%,100%{transform:translateY(0) scale(1);filter:brightness(1);box-shadow:0 0 0 2px rgba(36,95,199,.08),0 6px 16px rgba(20,49,96,.15)}50%{transform:translateY(-1px) scale(1.015);filter:brightness(1.045) saturate(1.04);box-shadow:0 0 0 3px rgba(36,95,199,.12),0 8px 18px rgba(20,83,161,.21)}}
+@keyframes cardActionShine{0%,28%{left:-64%}62%,100%{left:132%}}
+@keyframes cardActionClick{0%,100%{transform:scale(1)}50%{transform:scale(1.045);filter:brightness(1.065);box-shadow:0 2px 0 rgba(0,0,0,.11),0 0 0 2px rgba(36,95,199,.1),0 6px 13px rgba(20,49,96,.23)}}
+@keyframes cardActionArrow{from{transform:translateX(0) scale(1)}to{transform:translateX(3px) scale(1.045);filter:brightness(1.08)}}
 @media(max-width:700px){.offer-card__cta{padding:11px 9px 9px;border-radius:12px}}
 </style></head><body><header class="site-header"><div class="header-inner"><a class="logo" href="/"><span class="logo-badge">올</span><span>올딜 생활게시판</span></a><p class="hero-title">생활 서비스 계약 전에 확인할 조건을 정리합니다</p><nav class="nav"><a href="/">홈</a><a href="/moving/">포장이사</a><a href="/internet/">인터넷가입</a><a href="/water/">정수기렌탈</a><a href="/rentcar/">신차 장기렌터카</a></nav></div></header><main class="container"><article class="card post-wrap"><div class="post-action-bar"><p class="post-board-label"><a href="/internet/">인터넷가입 게시판</a></p></div><h1 class="post-title">영천 인터넷변경 저렴한곳, POS·와이파이 요금비교</h1><div class="post-meta">작성자 관리자 · <time datetime="2026-10-26T10:15:00+09:00">작성일 2026-10-26</time> · 수정일 2026-10-28</div><section id="provider-cards" class="offer-cards" data-link-card-version="2026-10-28-rich" aria-labelledby="internet-offers">
   <div class="offer-cards__intro">
