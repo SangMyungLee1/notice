@@ -65,6 +65,23 @@
 @keyframes cleaningJumpPulse{0%,100%{transform:scale(1);filter:brightness(1)}50%{transform:scale(1.08);filter:brightness(1.13)}}
 @media(max-width:700px){.moving-cleaning-jump{padding:22px 16px}.moving-cleaning-jump strong{font-size:1.46rem}.moving-cleaning-jump span{gap:8px;font-size:1.1rem}.moving-cleaning-jump b{padding:7px 12px;font-size:1.38em}}
 @media(prefers-reduced-motion:reduce){.moving-cleaning-jump b{animation:none}}
+</style><style id="card-action-row-animation-20261030">
+/* Animate only the action row, never the complete provider card. */
+.offer-card__cta{position:relative;isolation:isolate;overflow:hidden;padding:12px 11px 10px;border-radius:13px;background:linear-gradient(105deg,rgba(238,247,255,.94),rgba(255,255,255,.97),rgba(236,250,246,.94));box-shadow:0 3px 9px rgba(20,49,96,.08)}
+.offer-card__cta>*{position:relative;z-index:1}
+.offer-card__cta:after{position:absolute;z-index:0;top:-55%;left:-48%;width:28%;height:210%;content:"";pointer-events:none;background:linear-gradient(105deg,transparent,rgba(255,255,255,.98),transparent);transform:skewX(-22deg)}
+.offer-card__click,.offer-card__click:after{animation:none}
+@media(prefers-reduced-motion:no-preference){
+  .offer-card__cta{animation:cardActionHeartbeat 2.35s ease-in-out infinite}
+  .offer-card__cta:after{animation:cardActionShine 3s ease-in-out infinite}
+  .offer-card:nth-child(2) .offer-card__cta,.offer-card:nth-child(2) .offer-card__cta:after{animation-delay:.28s}
+  .offer-card:nth-child(3) .offer-card__cta,.offer-card:nth-child(3) .offer-card__cta:after{animation-delay:.54s}
+  .offer-card:nth-child(4) .offer-card__cta,.offer-card:nth-child(4) .offer-card__cta:after{animation-delay:.8s}
+}
+@keyframes cardActionHeartbeat{0%,100%{transform:scale(1);filter:brightness(1);box-shadow:0 3px 9px rgba(20,49,96,.08)}50%{transform:scale(1.018);filter:brightness(1.055);box-shadow:0 7px 16px rgba(20,83,161,.2)}}
+@keyframes cardActionShine{0%,30%{left:-48%}58%,100%{left:126%}}
+@media(max-width:700px){.offer-card__cta{padding:11px 9px 9px;border-radius:12px}}
+@media(prefers-reduced-motion:reduce){.offer-card__cta,.offer-card__cta:after{animation:none}}
 </style></head><body><header class="site-header"><div class="header-inner"><a class="logo" href="/"><span class="logo-badge">올</span><span>올딜 생활게시판</span></a><p class="hero-title">생활 서비스 계약 전에 확인할 조건을 정리합니다</p><nav class="nav"><a href="/">홈</a><a href="/moving/">포장이사</a><a href="/internet/">인터넷가입</a><a href="/water/">정수기렌탈</a><a href="/rentcar/">신차 장기렌터카</a></nav></div></header><main class="container"><article class="card post-wrap"><div class="post-action-bar"><p class="post-board-label"><a href="/rentcar/">신차 장기렌터카 게시판</a></p></div><h1 class="post-title">K5 하이브리드 장기렌트 비교사이트, 저렴한 렌트료 확인</h1><div class="post-meta">작성자 관리자 · <time datetime="2026-10-27T10:21:00+09:00">작성일 2026-10-27</time> · 수정일 2026-10-28</div><section id="provider-cards" class="offer-cards" data-link-card-version="2026-10-28-rich" aria-labelledby="rentcar-offers">
   <div class="offer-cards__intro">
     <span>EV3 장기렌트 업체 비교</span>
