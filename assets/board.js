@@ -8,6 +8,8 @@
   var currentPage = 1;
   var currentQuery = '';
   var allPosts = [];
+  var basePosts = [];
+  var extraPosts = [];
   var boards = [];
   var liveTimer = null;
 
@@ -233,13 +235,36 @@
     }
   }
 
+  function refreshRemotePosts() {
+    var seen = {};
+    var merged = [];
+    extraPosts.concat(basePosts).forEach(function(post) {
+      if (!post || !post.path) return;
+      var key = String(post.id || post.path);
+      if (seen[key]) return;
+      seen[key] = true;
+      merged.push(post);
+    });
+    allPosts = mergePendingPosts(merged);
+    render(false);
+  }
+
   function bootFetch(){
     fetch('/data/posts.json?ts=' + Date.now(), {cache:'no-store'})
       .then(function(res){ return res.ok ? res.json() : null; })
       .then(function(rows){
         if(Array.isArray(rows) && rows.length) {
-          allPosts = mergePendingPosts(rows);
-          render(false);
+          basePosts = rows;
+          refreshRemotePosts();
+        }
+      })
+      .catch(function(){});
+    fetch('/data/extra-posts.json?ts=' + Date.now(), {cache:'no-store'})
+      .then(function(res){ return res.ok ? res.json() : null; })
+      .then(function(rows){
+        if(Array.isArray(rows)) {
+          extraPosts = rows;
+          refreshRemotePosts();
         }
       })
       .catch(function(){});
@@ -263,7 +288,8 @@
     boardFilter = window.NOTICE_BOARD_FILTER || 'all';
     pageBase = window.NOTICE_PAGE_BASE || location.pathname || '/';
     perPage = Number(window.NOTICE_PER_PAGE || 10) || 10;
-    allPosts = mergePendingPosts(Array.isArray(window.NOTICE_POSTS) ? window.NOTICE_POSTS : []);
+    basePosts = Array.isArray(window.NOTICE_POSTS) ? window.NOTICE_POSTS : [];
+    allPosts = mergePendingPosts(basePosts);
     boards = Array.isArray(window.NOTICE_BOARDS) ? window.NOTICE_BOARDS : [];
     bindSearchEvents();
     loadFromUrl();

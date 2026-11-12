@@ -94,7 +94,8 @@ async function handleCreatePost(request, env) {
   const requestedBoard = cleanText(body.board || 'free');
   const board = boards.find((item) => item.slug === requestedBoard) || boards.find((item) => item.slug === 'free') || defaultBoards()[0];
   const posts = await loadPosts(env);
-  const nextId = Math.max(1000, ...posts.map((post) => Number(post.id) || 0)) + 1;
+  const extraPosts = await loadExtraPosts(env);
+  const nextId = Math.max(1000, ...posts.concat(extraPosts).map((post) => Number(post.id) || 0)) + 1;
   const createdAt = new Date().toISOString();
   let contentHtml = sanitizeAdminHtml(rawContent);
   contentHtml = enrichContentImages(contentHtml, title, board, nextId);
@@ -117,11 +118,17 @@ async function handleCreatePost(request, env) {
     image: imageUrls[0] || '',
     searchText: stripTags(contentHtml)
   };
-  const nextPosts = [newPost, ...posts].sort((a, b) => Number(b.id) - Number(a.id));
+  const nextExtraPosts = [newPost, ...extraPosts].sort((a, b) => Number(b.id) - Number(a.id));
+  const nextPosts = [...nextExtraPosts, ...posts].sort((a, b) => Number(b.id) - Number(a.id));
 
-  const files = buildSiteFiles(env, nextPosts, boards);
-  files.push({ path, content: renderPostPage(env, newPost, contentHtml, nextPosts, boards), encoding: 'utf-8' });
-  files.unshift({ path: 'data/posts.json', content: JSON.stringify(nextPosts, null, 2), encoding: 'utf-8' });
+  // Preserve the original large posts.json and generated board indexes.
+  // Only commit the new article, its small append-only list, and discovery feeds.
+  const files = [
+    { path: 'data/extra-posts.json', content: JSON.stringify(nextExtraPosts, null, 2), encoding: 'utf-8' },
+    { path, content: renderPostPage(env, newPost, contentHtml, nextPosts, boards), encoding: 'utf-8' },
+    { path: 'sitemap.xml', content: renderSitemap(env, nextPosts, boards), encoding: 'utf-8' },
+    { path: 'rss.xml', content: renderRss(env, nextPosts), encoding: 'utf-8' }
+  ];
 
   await commitFiles(env, `create post ${nextId}: ${title}`, files);
 
@@ -400,6 +407,17 @@ async function loadPosts(env) {
   return posts;
 }
 
+
+async function loadExtraPosts(env) {
+  const data = await githubFetch(env, `/repos/${env.GITHUB_OWNER}/${env.GITHUB_REPO}/contents/data/extra-posts.json?ref=${encodeURIComponent(env.GITHUB_BRANCH)}`);
+  const blob = data.content ? data : await githubFetch(env, `/repos/${env.GITHUB_OWNER}/${env.GITHUB_REPO}/git/blobs/${data.sha}`);
+  if (!blob.content || blob.encoding !== 'base64') {
+    throw new Error('추가 게시글 목록을 읽지 못해 저장을 중단했습니다.');
+  }
+  const rows = JSON.parse(decodeBase64Content(blob.content));
+  if (!Array.isArray(rows)) throw new Error('추가 게시글 목록의 형식이 올바르지 않습니다.');
+  return rows;
+}
 
 async function loadBoards(env) {
   try {
