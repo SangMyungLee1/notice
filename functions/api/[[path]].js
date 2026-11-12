@@ -384,14 +384,20 @@ async function githubFetch(env, path, options = {}) {
 }
 
 async function loadPosts(env) {
-  try {
-    const data = await githubFetch(env, `/repos/${env.GITHUB_OWNER}/${env.GITHUB_REPO}/contents/data/posts.json?ref=${encodeURIComponent(env.GITHUB_BRANCH)}`);
-    const jsonText = decodeBase64Content(data.content || '');
-    const posts = JSON.parse(jsonText);
-    return Array.isArray(posts) ? posts : [];
-  } catch (_) {
-    return [];
+  const filePath = `/repos/${env.GITHUB_OWNER}/${env.GITHUB_REPO}/contents/data/posts.json?ref=${encodeURIComponent(env.GITHUB_BRANCH)}`;
+  const metadata = await githubFetch(env, filePath);
+  // GitHub Contents API omits content for files larger than 1 MiB.
+  const blob = metadata.content
+    ? metadata
+    : await githubFetch(env, `/repos/${env.GITHUB_OWNER}/${env.GITHUB_REPO}/git/blobs/${metadata.sha}`);
+  if (!blob.content || blob.encoding !== 'base64') {
+    throw new Error('게시글 목록을 읽을 수 없어 저장을 중단했습니다.');
   }
+  const posts = JSON.parse(decodeBase64Content(blob.content));
+  if (!Array.isArray(posts)) {
+    throw new Error('게시글 목록 형식이 올바르지 않아 저장을 중단했습니다.');
+  }
+  return posts;
 }
 
 
